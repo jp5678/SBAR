@@ -7,341 +7,285 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script type="module">
-import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-window._fb = { initializeApp, getApps, getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, limit };
-window._fbReady = true;
+import{initializeApp,getApps}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import{getFirestore,collection,addDoc,getDocs,deleteDoc,doc,query,orderBy,limit}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+window._fb={initializeApp,getApps,getFirestore,collection,addDoc,getDocs,deleteDoc,doc,query,orderBy,limit};
+window._fbReady=true;
 </script>
 <style>
-/* ═══════════════════════════════════════
-   ROOT
-═══════════════════════════════════════ */
 :root{
-  --pri:#0B4F6C; --pri-mid:#1268A1; --pri-lt:#1a7fa6;
-  --acc:#10B981; --acc-lt:#34D399;
-  --bg:#EAF1F7; --card:#fff; --txt:#1a2332; --muted:#607080; --bdr:#ccd9e3;
-  /* SBAR section colors */
-  --sc:#2563EB; --sbg:#EFF6FF; --sbr:#bfdbfe;
-  --bc:#7C3AED; --bbg:#F5F3FF; --bbr:#ddd6fe;
-  --ac:#D97706; --abg:#FFFBEB; --abr:#fde68a;
-  --rc:#059669; --rbg:#ECFDF5; --rbr:#a7f3d0;
-  /* Vital status colors */
-  --v-normal:#16a34a; --v-normal-bg:#f0fdf4; --v-normal-br:#86efac;
-  --v-warn:#d97706;   --v-warn-bg:#fffbeb;   --v-warn-br:#fcd34d;
-  --v-crit:#dc2626;   --v-crit-bg:#fff1f2;   --v-crit-br:#fca5a5;
-  --sh:0 2px 12px rgba(11,79,108,.1); --rad:14px; --rad-sm:9px;
+  --pri:#0D4F38;--pri-mid:#166534;--pri-lt:#15803d;
+  --acc:#D97706;--acc-lt:#F59E0B;
+  --bg:#F0FBF5;--bg2:#E4F2EA;--card:#fff;
+  --txt:#0F2918;--muted:#4B7A5A;--bdr:#C3E0CE;
+  --sc:#1d4ed8;--sbg:#EFF6FF;--sbr:#93c5fd;
+  --bc:#6d28d9;--bbg:#F5F3FF;--bbr:#c4b5fd;
+  --ac:#b45309;--abg:#FFFBEB;--abr:#fcd34d;
+  --rc:#065f46;--rbg:#ECFDF5;--rbr:#6ee7b7;
+  --vn:#16a34a;--vnbg:#f0fdf4;--vnbr:#86efac;
+  --vw:#d97706;--vwbg:#fffbeb;--vwbr:#fcd34d;
+  --vc:#dc2626;--vcbg:#fff1f2;--vcbr:#fca5a5;
+  --sh:0 2px 12px rgba(13,79,56,.09);--rad:14px;--rad-sm:9px;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;-webkit-font-smoothing:antialiased;}
-
-/* ─── HEADER ─── */
-.hdr{
-  background:linear-gradient(135deg,#071e2e 0%,var(--pri) 40%,var(--pri-mid) 100%);
-  color:#fff;padding:0 26px;height:64px;
-  display:flex;align-items:center;justify-content:space-between;
-  box-shadow:0 4px 24px rgba(7,30,46,.4);position:sticky;top:0;z-index:100;
-}
-.hdr-l{display:flex;align-items:center;gap:11px;}
-.hdr-logo{width:40px;height:40px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
-.hdr-title{font-size:17px;font-weight:800;letter-spacing:-.4px;}
-.hdr-sub{font-size:10px;opacity:.6;margin-top:2px;}
-.hdr-r{display:flex;align-items:center;gap:9px;}
-.hdr-badge{border-radius:20px;padding:5px 12px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px;white-space:nowrap;}
-.hbadge-ok{background:rgba(16,185,129,.2);border:1px solid rgba(16,185,129,.4);color:#a7f3d0;}
-.hbadge-off{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);}
-.hdr-btn{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);border-radius:8px;color:#fff;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;gap:5px;transition:background .2s;}
+.hdr{background:linear-gradient(135deg,#06291A 0%,#0D4F38 45%,#166534 100%);color:#fff;padding:0 22px;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 24px rgba(6,41,26,.45);position:sticky;top:0;z-index:100;}
+.hdr-l{display:flex;align-items:center;gap:12px;}
+.hdr-logo{width:44px;height:44px;border-radius:50%;border:2.5px solid rgba(253,224,71,.55);overflow:hidden;flex-shrink:0;box-shadow:0 3px 14px rgba(0,0,0,.45),0 0 0 3px rgba(253,224,71,.18);}
+.hdr-logo img{width:100%;height:100%;object-fit:cover;}
+.hdr-title{font-size:16px;font-weight:800;letter-spacing:-.3px;line-height:1.2;}
+.hdr-sub{font-size:10px;opacity:.65;margin-top:2px;}
+.hdr-r{display:flex;align-items:center;gap:8px;}
+.hdr-badge{border-radius:20px;padding:5px 11px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px;white-space:nowrap;}
+.hb-ok{background:rgba(253,224,71,.2);border:1px solid rgba(253,224,71,.4);color:#fde047;}
+.hb-off{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);}
+.hdr-btn{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);border-radius:8px;color:#fff;padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;gap:4px;transition:background .2s;}
 .hdr-btn:hover{background:rgba(255,255,255,.24);}
-
-/* ─── LAYOUT ─── */
-.wrap{max-width:1100px;margin:0 auto;padding:20px 14px 110px;}
-.tabs{display:flex;gap:3px;background:rgba(11,79,108,.08);padding:4px;border-radius:12px;width:fit-content;margin-bottom:18px;}
-.tab-btn{padding:8px 18px;border:none;background:transparent;border-radius:8px;font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;white-space:nowrap;}
-.tab-btn.active{background:var(--pri);color:#fff;box-shadow:0 2px 8px rgba(11,79,108,.3);}
-.tab-btn:not(.active):hover{background:rgba(11,79,108,.1);color:var(--pri);}
+.wrap{max-width:1100px;margin:0 auto;padding:18px 14px 110px;}
+.tabs{display:flex;gap:3px;background:rgba(13,79,56,.09);padding:4px;border-radius:12px;width:fit-content;margin-bottom:16px;}
+.tab-btn{padding:8px 16px;border:none;background:transparent;border-radius:8px;font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;white-space:nowrap;}
+.tab-btn.active{background:var(--pri);color:#fff;box-shadow:0 2px 8px rgba(13,79,56,.3);}
+.tab-btn:not(.active):hover{background:rgba(13,79,56,.1);color:var(--pri);}
 .nbadge{background:var(--acc);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;}
-
-/* ─── CARD ─── */
 .card{background:var(--card);border-radius:var(--rad);padding:18px;box-shadow:var(--sh);margin-bottom:12px;border:1px solid var(--bdr);}
-.chdr{display:flex;align-items:center;gap:9px;margin-bottom:14px;padding-bottom:11px;border-bottom:2px solid var(--bg);}
+.chdr{display:flex;align-items:center;gap:9px;margin-bottom:13px;padding-bottom:10px;border-bottom:2px solid var(--bg2);}
 .cico{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
 .chdr h3{font-size:13.5px;font-weight:700;color:var(--pri);}
 .chdr p{font-size:11px;color:var(--muted);margin-top:1px;}
-
-/* ─── FORM BASE ─── */
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
 .full{grid-column:1/-1;}
 .fgrp{display:flex;flex-direction:column;gap:3px;}
 label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
-input,textarea,select{font-family:'Noto Sans KR',sans-serif;font-size:13px;border:1.5px solid var(--bdr);border-radius:var(--rad-sm);padding:8px 10px;color:var(--txt);background:#fff;transition:border-color .18s,box-shadow .18s,background .18s;outline:none;}
-input:focus,textarea:focus,select:focus{border-color:var(--pri-lt);box-shadow:0 0 0 3px rgba(26,127,166,.12);}
-textarea{resize:vertical;min-height:70px;line-height:1.65;}
+input,textarea,select{font-family:'Noto Sans KR',sans-serif;font-size:13px;border:1.5px solid var(--bdr);border-radius:var(--rad-sm);padding:8px 10px;color:var(--txt);background:#fff;transition:border-color .18s,box-shadow .18s;outline:none;}
+input:focus,textarea:focus,select:focus{border-color:var(--pri-lt);box-shadow:0 0 0 3px rgba(21,128,61,.14);}
+textarea{resize:vertical;min-height:68px;line-height:1.65;}
 .sec-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
 .sec-lbl::after{content:'';flex:1;height:1px;background:var(--bdr);}
-
-/* ─── VITAL SIGNS PANEL ─── */
-.vital-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px;}
-.vbox{
-  border-radius:12px;border:2px solid var(--bdr);
-  background:#fafcff;
-  padding:11px 8px 8px;
-  display:flex;flex-direction:column;align-items:center;gap:4px;
-  position:relative;
-  transition:border-color .25s,background .25s,box-shadow .25s;
-}
-.vbox.v-normal{border-color:var(--v-normal-br);background:var(--v-normal-bg);}
-.vbox.v-warn  {border-color:var(--v-warn-br);background:var(--v-warn-bg);}
-.vbox.v-crit  {border-color:var(--v-crit-br);background:var(--v-crit-bg);box-shadow:0 0 12px rgba(220,38,38,.2);animation:critPulse 1.4s ease-in-out infinite;}
-@keyframes critPulse{
-  0%,100%{box-shadow:0 0 6px rgba(220,38,38,.2);}
-  50%    {box-shadow:0 0 20px rgba(220,38,38,.55);}
-}
-.vbox-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
-.vbox input{
-  width:100%;font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:700;
-  text-align:center;border:none;background:transparent;padding:4px 2px;color:var(--txt);
-  outline:none;
-}
-.vbox.v-warn input{color:var(--v-warn);}
-.vbox.v-crit input{color:var(--v-crit);}
+.vital-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:11px;}
+.vbox{border-radius:12px;border:2px solid var(--bdr);background:#fafcff;padding:10px 7px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;transition:border-color .25s,background .25s,box-shadow .25s;}
+.vbox.v-normal{border-color:var(--vnbr);background:var(--vnbg);}
+.vbox.v-warn{border-color:var(--vwbr);background:var(--vwbg);}
+.vbox.v-crit{border-color:var(--vcbr);background:var(--vcbg);box-shadow:0 0 0 2px rgba(220,38,38,.25);}
+.vbox-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+.vbox input{width:100%;font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:700;text-align:center;border:none;background:transparent;padding:3px 2px;color:var(--txt);outline:none;}
+.vbox.v-warn input{color:var(--vw);}.vbox.v-crit input{color:var(--vc);}
 .vbox-unit{font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
-/* STATUS BADGE */
-.vstatus{
-  display:inline-flex;align-items:center;gap:3px;
-  padding:2px 8px;border-radius:20px;
-  font-size:10px;font-weight:800;letter-spacing:.4px;
-  margin-top:2px;transition:all .25s;
-}
-.vs-none  {background:#F3F4F6;color:#9CA3AF;border:1.5px solid #e5e7eb;}
-.vs-normal{background:var(--v-normal-bg);color:var(--v-normal);border:1.5px solid var(--v-normal-br);}
-.vs-warn  {background:var(--v-warn-bg);color:var(--v-warn);border:1.5px solid var(--v-warn-br);}
-.vs-crit  {background:var(--v-crit-bg);color:var(--v-crit);border:1.5px solid var(--v-crit-br);animation:badgeBlink 1s step-start infinite;}
-@keyframes badgeBlink{0%,100%{opacity:1;}50%{opacity:.2;}}
-
-/* BP special: two-part input */
-.bp-row{display:flex;align-items:center;gap:2px;width:100%;}
-.bp-row input{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:700;text-align:center;border:none;background:transparent;padding:4px 0;color:var(--txt);outline:none;flex:1;min-width:0;}
-.vbox.v-warn .bp-row input{color:var(--v-warn);}
-.vbox.v-crit .bp-row input{color:var(--v-crit);}
-.bp-sep{font-size:16px;font-weight:700;color:var(--muted);flex-shrink:0;}
-
-/* VITAL SUMMARY BAR */
-.vital-summary{
-  background:linear-gradient(90deg,#0f2a3c,#1268A1);
-  border-radius:10px;padding:9px 16px;margin-top:6px;
-  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-}
-.vital-summary .vs-label{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);margin-right:4px;}
-.vital-summary .vs-item{display:flex;align-items:center;gap:5px;font-size:12px;color:#fff;}
-.vital-summary .vs-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.vs-dot-ok{background:#4ade80;}
-.vs-dot-warn{background:#fbbf24;}
-.vs-dot-crit{background:#f87171;animation:dotBlink 1s step-start infinite;}
+.vstatus{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:800;letter-spacing:.4px;margin-top:1px;}
+.vs-none{background:#F3F4F6;color:#9CA3AF;border:1.5px solid #e5e7eb;}
+.vs-normal{background:var(--vnbg);color:var(--vn);border:1.5px solid var(--vnbr);}
+.vs-warn{background:var(--vwbg);color:var(--vw);border:1.5px solid var(--vwbr);}
+.vs-crit{background:var(--vcbg);color:var(--vc);border:1.5px solid var(--vcbr);animation:badgeBlink 1s step-start infinite;}
+@keyframes badgeBlink{0%,100%{opacity:1;}50%{opacity:.15;}}
+.bp-row{display:flex;align-items:center;gap:1px;width:100%;}
+.bp-row input{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:700;text-align:center;border:none;background:transparent;padding:3px 0;color:var(--txt);outline:none;flex:1;min-width:0;}
+.vbox.v-warn .bp-row input{color:var(--vw);}.vbox.v-crit .bp-row input{color:var(--vc);}
+.bp-sep{font-size:15px;font-weight:700;color:var(--muted);flex-shrink:0;}
+.vital-summary{background:linear-gradient(90deg,#06291A,#0D4F38);border-radius:10px;padding:9px 14px;margin-top:5px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.vital-summary .vs-lbl{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);}
+.vs-item{display:flex;align-items:center;gap:5px;font-size:11.5px;color:#fff;}
+.vs-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.vs-dot-ok{background:#4ade80;}.vs-dot-warn{background:#fbbf24;}.vs-dot-crit{background:#f87171;animation:dotBlink 1s step-start infinite;}
 @keyframes dotBlink{0%,100%{opacity:1;}50%{opacity:0;}}
-
-/* GCS INPUT */
-.gcs-row{margin-top:10px;}
-
-/* ─── BUTTONS ─── */
-.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border:none;border-radius:var(--rad-sm);font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;}
-.btn-p{background:linear-gradient(135deg,var(--pri),var(--pri-lt));color:#fff;box-shadow:0 3px 10px rgba(11,79,108,.28);}
+.v-legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.v-leg-item{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;}
+.v-leg-dot{width:9px;height:9px;border-radius:50%;}
+.vld-n{background:var(--vn);}.vld-w{background:var(--vw);}.vld-c{background:var(--vc);}
+.snd-toggle{display:flex;align-items:center;gap:6px;padding:5px 11px;background:rgba(13,79,56,.07);border-radius:8px;border:1px solid var(--bdr);cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);transition:all .2s;margin-left:auto;}
+.snd-toggle.muted-st{color:var(--vc);border-color:var(--vcbr);background:var(--vcbg);}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 15px;border:none;border-radius:var(--rad-sm);font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.btn-p{background:linear-gradient(135deg,var(--pri),var(--pri-lt));color:#fff;box-shadow:0 3px 10px rgba(13,79,56,.3);}
 .btn-p:hover{transform:translateY(-1px);}
 .btn-g{background:linear-gradient(135deg,var(--acc),var(--acc-lt));color:#fff;}
 .btn-g:hover{transform:translateY(-1px);}
 .btn-o{background:#fff;border:1.5px solid var(--bdr);color:var(--txt);}
-.btn-o:hover{border-color:var(--pri);color:var(--pri);background:#f0f7fb;}
-.btn-sm{padding:5px 12px;font-size:12px;}
-.btn-xs{padding:4px 9px;font-size:11px;}
-.demo-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(16,185,129,.1);border:1.5px solid rgba(16,185,129,.3);border-radius:8px;font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:600;color:var(--acc);cursor:pointer;margin-bottom:14px;transition:all .2s;}
-.demo-btn:hover{background:rgba(16,185,129,.2);}
-
-/* GEN CTA */
+.btn-o:hover{border-color:var(--pri);color:var(--pri);background:#f0faf4;}
+.btn-sm{padding:5px 11px;font-size:12px;}.btn-xs{padding:4px 9px;font-size:11px;}
+.btn-score{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;}
+.btn-score:hover{transform:translateY(-1px);}
+.ai-demo-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;background:linear-gradient(135deg,#0D4F38,#166534);border:none;border-radius:10px;font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:700;color:#fff;cursor:pointer;margin-bottom:13px;transition:all .25s;box-shadow:0 4px 14px rgba(13,79,56,.28);}
+.ai-demo-btn:hover{transform:translateY(-1px);}
+.spin-ico{display:none;animation:spin .8s linear infinite;}.ai-demo-btn.loading .spin-ico{display:inline;}.ai-demo-btn.loading .idle-ico{display:none;}
+@keyframes spin{to{transform:rotate(360deg)}}
 .gen-cta{text-align:center;padding:8px 0 4px;}
-.main-btn{padding:14px 44px;font-size:15px;border-radius:12px;
-  background:linear-gradient(90deg,#071e2e 0%,#0B4F6C 35%,#1268A1 65%,#10B981 100%);
-  background-size:250% auto;color:#fff;border:none;cursor:pointer;
-  font-family:'Noto Sans KR',sans-serif;font-weight:800;
-  box-shadow:0 6px 24px rgba(11,79,108,.35);
-  display:inline-flex;align-items:center;gap:9px;
-  animation:gradMove 6s linear infinite;}
+.main-btn{padding:13px 42px;font-size:15px;border-radius:12px;background:linear-gradient(90deg,#06291A 0%,#0D4F38 35%,#166534 65%,#D97706 100%);background-size:250% auto;color:#fff;border:none;cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-weight:800;box-shadow:0 6px 24px rgba(13,79,56,.35);display:inline-flex;align-items:center;gap:9px;animation:gradMove 6s linear infinite;}
 @keyframes gradMove{0%{background-position:0%}100%{background-position:250%}}
-.main-btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(11,79,108,.45);}
-
-/* ─── SBAR RESULT ─── */
-.pt-banner{background:linear-gradient(135deg,#071e2e 0%,var(--pri) 55%,var(--pri-mid) 100%);color:#fff;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:13px;margin-bottom:11px;}
-.pt-name{font-size:16px;font-weight:700;}
-.pt-detail{font-size:11px;opacity:.75;margin-top:3px;}
-.pt-meta{margin-left:auto;text-align:right;font-size:11px;opacity:.7;line-height:1.9;}
-.act-bar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:11px;padding:10px 13px;background:var(--card);border-radius:var(--rad-sm);border:1px solid var(--bdr);box-shadow:var(--sh);}
+.main-btn:hover{transform:translateY(-2px);}
+.pt-banner{background:linear-gradient(135deg,#06291A 0%,#0D4F38 55%,#166534 100%);color:#fff;border-radius:12px;padding:13px 17px;display:flex;align-items:center;gap:13px;margin-bottom:10px;}
+.pt-name{font-size:16px;font-weight:700;}.pt-detail{font-size:11px;opacity:.75;margin-top:3px;}.pt-meta{margin-left:auto;text-align:right;font-size:11px;opacity:.7;line-height:1.9;}
+.act-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;padding:9px 12px;background:var(--card);border-radius:var(--rad-sm);border:1px solid var(--bdr);box-shadow:var(--sh);}
 .sbar-sec{border-radius:12px;overflow:hidden;box-shadow:var(--sh);border:1px solid transparent;margin-bottom:10px;animation:fadeUp .35s ease forwards;opacity:0;transform:translateY(10px);}
 .sbar-sec:nth-child(1){animation-delay:.04s}.sbar-sec:nth-child(2){animation-delay:.10s}.sbar-sec:nth-child(3){animation-delay:.16s}.sbar-sec:nth-child(4){animation-delay:.22s}
 @keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
 .ss{background:var(--sbg);border-color:var(--sbr);}.sb{background:var(--bbg);border-color:var(--bbr);}.sa{background:var(--abg);border-color:var(--abr);}.sr{background:var(--rbg);border-color:var(--rbr);}
-.sbar-hd{padding:11px 16px;display:flex;align-items:center;gap:11px;}
+.sbar-hd{padding:10px 15px;display:flex;align-items:center;gap:10px;}
 .ss .sbar-hd{background:var(--sc);}.sb .sbar-hd{background:var(--bc);}.sa .sbar-hd{background:var(--ac);}.sr .sbar-hd{background:var(--rc);}
-.skey{width:34px;height:34px;background:rgba(255,255,255,.22);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:700;color:#fff;flex-shrink:0;}
+.skey{width:33px;height:33px;background:rgba(255,255,255,.22);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:700;color:#fff;flex-shrink:0;}
 .sht h4{font-size:13px;font-weight:700;color:#fff;}.sht p{font-size:11px;color:rgba(255,255,255,.75);margin-top:1px;}
-.sbar-body{padding:14px 17px;font-size:13px;line-height:1.85;color:var(--txt);white-space:pre-wrap;min-height:52px;}
-.sbar-body[contenteditable="true"]{outline:none;border:1.5px dashed rgba(11,79,108,.3);border-radius:6px;background:rgba(255,255,255,.6);}
+.sbar-body{padding:13px 16px;font-size:13px;line-height:1.85;color:var(--txt);white-space:pre-wrap;min-height:50px;}
+.sbar-body[contenteditable="true"]{outline:none;border:1.5px dashed rgba(13,79,56,.3);border-radius:6px;background:rgba(255,255,255,.6);}
 .edit-ind{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;background:#FFF8E7;border:1.5px solid #FBBF24;border-radius:6px;font-size:11px;font-weight:600;color:#92400e;margin-bottom:7px;}
-
-/* MBADGE */
-.mbadge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
-.m-ai{background:#EFF6FF;color:#1d4ed8;border:1.5px solid #bfdbfe;}
-.m-ok{background:#ECFDF5;color:#065f46;border:1.5px solid #a7f3d0;}
-.m-off{background:#F3F4F6;color:#6b7280;border:1.5px solid #d1d5db;}
-.m-err{background:#FEF2F2;color:#dc2626;border:1.5px solid #fca5a5;}
-
-/* HISTORY */
+.mbadge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;}
+.m-ai{background:#EFF6FF;color:#1d4ed8;border:1.5px solid #bfdbfe;}.m-ok{background:#ECFDF5;color:#065f46;border:1.5px solid #a7f3d0;}.m-off{background:#F3F4F6;color:#6b7280;border:1.5px solid #d1d5db;}
 .hist-item{background:#fff;border-radius:10px;padding:11px 14px;border:1px solid var(--bdr);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:11px;margin-bottom:8px;box-shadow:var(--sh);}
 .hist-item:hover{border-color:var(--pri-lt);transform:translateX(3px);}
+.admin-badge{background:rgba(220,38,38,.18);border:1px solid rgba(220,38,38,.35);border-radius:20px;padding:4px 11px;font-size:11px;font-weight:700;color:#fca5a5;display:flex;align-items:center;gap:4px;}
+.pin-dots{display:flex;gap:10px;justify-content:center;margin:16px 0;}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--bdr);transition:all .2s;}
+.pin-dot.filled{background:var(--pri);border-color:var(--pri);}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;max-width:220px;margin:0 auto;}
+.pin-key{padding:14px 0;border:1.5px solid var(--bdr);border-radius:10px;font-size:18px;font-weight:700;cursor:pointer;background:#fff;color:var(--txt);transition:all .18s;font-family:'IBM Plex Mono',monospace;}
+.pin-key:hover{border-color:var(--pri);background:var(--bg2);}
+.pin-key:active{transform:scale(.95);}
+.pin-key.del-key{font-size:14px;color:var(--muted);}
+.pin-shake{animation:pinShake .4s ease;}
+@keyframes pinShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 .hist-ico{width:34px;height:34px;background:linear-gradient(135deg,var(--pri),var(--pri-lt));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
-.empty{text-align:center;padding:48px 20px;color:var(--muted);}
+.empty{text-align:center;padding:44px 20px;color:var(--muted);}
 .empty .emo{font-size:40px;margin-bottom:9px;}
-
-/* LOADING */
-.ld-ov{display:none;position:fixed;inset:0;background:rgba(7,30,46,.6);backdrop-filter:blur(6px);z-index:998;justify-content:center;align-items:center;flex-direction:column;gap:16px;}
+.ld-ov{display:none;position:fixed;inset:0;background:rgba(6,41,26,.6);backdrop-filter:blur(6px);z-index:998;justify-content:center;align-items:center;flex-direction:column;gap:14px;}
 .ld-ov.on{display:flex;}
-.spinner{width:48px;height:48px;border:4px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg)}}
-.ld-msg{color:#fff;font-size:14px;font-weight:600;}
-.ld-sub{color:rgba(255,255,255,.6);font-size:12px;}
-
-/* TOAST */
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(70px);background:#0f2a3c;color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;box-shadow:0 6px 22px rgba(0,0,0,.25);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);z-index:9999;white-space:nowrap;}
+.spinner{width:46px;height:46px;border:4px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;}
+.ld-msg{color:#fff;font-size:14px;font-weight:600;}.ld-sub{color:rgba(255,255,255,.6);font-size:12px;}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(70px);background:#0D2E1C;color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;box-shadow:0 6px 22px rgba(0,0,0,.25);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);z-index:9999;white-space:nowrap;}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
-
-/* SETTINGS MODAL */
 .modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px);z-index:9000;justify-content:center;align-items:center;padding:14px;}
 .modal-ov.on{display:flex;}
 .modal{background:#fff;border-radius:16px;width:100%;max-width:560px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.28);}
-.modal-hdr{padding:16px 20px 13px;border-bottom:1.5px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;}
+.modal-hdr{padding:15px 20px 12px;border-bottom:1.5px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;}
 .modal-hdr h3{font-size:15px;font-weight:700;color:var(--pri);}
 .mc-btn{background:none;border:none;font-size:19px;cursor:pointer;color:var(--muted);}
 .modal-body{padding:18px 20px;}
-.m-sec{margin-bottom:20px;}
-.m-sec h4{font-size:13px;font-weight:700;color:var(--pri);margin-bottom:11px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
 .modal-ft{padding:13px 20px;border-top:1.5px solid var(--bdr);display:flex;gap:8px;justify-content:flex-end;}
+.m-sec{margin-bottom:18px;}.m-sec h4{font-size:13px;font-weight:700;color:var(--pri);margin-bottom:10px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
 .fld{display:flex;flex-direction:column;gap:3px;margin-bottom:9px;}
 .fld label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
 .fld input{font-family:'IBM Plex Mono',monospace;font-size:12px;}
-.fb-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-
-/* CHATBOT */
-.chat-fab{position:fixed;bottom:22px;right:22px;width:54px;height:54px;background:linear-gradient(135deg,var(--pri),var(--pri-mid));border-radius:50%;border:none;cursor:pointer;box-shadow:0 6px 22px rgba(11,79,108,.45);display:flex;align-items:center;justify-content:center;font-size:22px;transition:all .25s cubic-bezier(.34,1.56,.64,1);z-index:800;}
+.score-modal{max-width:600px;}
+.score-total-box{text-align:center;padding:18px 0 20px;border-bottom:2px solid var(--bg2);margin-bottom:18px;}
+.score-num{font-size:58px;font-weight:900;line-height:1;}
+.score-grade{display:inline-flex;align-items:center;padding:5px 20px;border-radius:24px;font-size:20px;font-weight:800;margin-top:8px;}
+.score-overall{font-size:12px;color:var(--muted);margin-top:11px;line-height:1.6;max-width:420px;margin-left:auto;margin-right:auto;}
+.score-sec{margin-bottom:15px;}
+.score-sec-hdr{display:flex;align-items:center;gap:9px;margin-bottom:6px;}
+.score-key{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
+.score-lbl{font-size:13px;font-weight:700;color:var(--txt);flex:1;}
+.score-val{font-size:15px;font-weight:800;}
+.score-bar-bg{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin-bottom:6px;}
+.score-bar-fill{height:100%;border-radius:4px;transition:width .8s cubic-bezier(.34,1.56,.64,1);}
+.score-comment{font-size:12px;color:var(--muted);line-height:1.55;padding-left:4px;}
+.chat-fab{position:fixed;bottom:22px;right:22px;width:52px;height:52px;background:linear-gradient(135deg,var(--pri),var(--pri-mid));border-radius:50%;border:none;cursor:pointer;box-shadow:0 6px 22px rgba(13,79,56,.45);display:flex;align-items:center;justify-content:center;font-size:21px;transition:all .25s cubic-bezier(.34,1.56,.64,1);z-index:800;}
 .chat-fab:hover{transform:scale(1.12);}
-.chatbot{position:fixed;bottom:88px;right:22px;width:350px;max-height:520px;background:#fff;border-radius:18px;box-shadow:0 12px 50px rgba(11,79,108,.25);border:1px solid var(--bdr);display:flex;flex-direction:column;z-index:800;transform:scale(.85) translateY(28px);opacity:0;pointer-events:none;transition:all .25s cubic-bezier(.34,1.56,.64,1);transform-origin:bottom right;}
+.chatbot{position:fixed;bottom:85px;right:22px;width:348px;max-height:510px;background:#fff;border-radius:18px;box-shadow:0 12px 50px rgba(13,79,56,.22);border:1px solid var(--bdr);display:flex;flex-direction:column;z-index:800;transform:scale(.85) translateY(28px);opacity:0;pointer-events:none;transition:all .25s cubic-bezier(.34,1.56,.64,1);transform-origin:bottom right;}
 .chatbot.open{transform:scale(1) translateY(0);opacity:1;pointer-events:all;}
-.chat-hdr{background:linear-gradient(135deg,#071e2e 0%,var(--pri) 55%,var(--pri-mid) 100%);border-radius:18px 18px 0 0;padding:12px 15px;display:flex;align-items:center;gap:9px;color:#fff;}
-.chat-av{width:32px;height:32px;background:rgba(255,255,255,.18);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.chat-hdr{background:linear-gradient(135deg,#06291A 0%,var(--pri) 55%,var(--pri-mid) 100%);border-radius:18px 18px 0 0;padding:11px 14px;display:flex;align-items:center;gap:9px;color:#fff;}
+.chat-av{width:31px;height:31px;background:rgba(255,255,255,.18);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;}
 .chat-info strong{font-size:13px;font-weight:700;}.chat-info span{display:block;font-size:10px;opacity:.7;margin-top:1px;}
-.chat-x{margin-left:auto;background:rgba(255,255,255,.15);border:none;color:#fff;width:25px;height:25px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;}
+.chat-x{margin-left:auto;background:rgba(255,255,255,.15);border:none;color:#fff;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;}
 .chat-x:hover{background:rgba(255,255,255,.28);}
-.chat-msgs{flex:1;overflow-y:auto;padding:12px 12px 6px;display:flex;flex-direction:column;gap:9px;max-height:310px;}
+.chat-msgs{flex:1;overflow-y:auto;padding:11px 11px 6px;display:flex;flex-direction:column;gap:8px;max-height:300px;}
 .chat-msgs::-webkit-scrollbar{width:3px;}.chat-msgs::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px;}
 .msg{display:flex;gap:7px;align-items:flex-end;}.msg.user{flex-direction:row-reverse;}
 .bubble{max-width:82%;padding:8px 12px;border-radius:14px;font-size:12.5px;line-height:1.6;}
 .msg.bot .bubble{background:var(--bg);border-bottom-left-radius:4px;color:var(--txt);}
 .msg.user .bubble{background:linear-gradient(135deg,var(--pri),var(--pri-lt));color:#fff;border-bottom-right-radius:4px;}
-.mav{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;}
+.mav{width:23px;height:23px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;}
 .msg.bot .mav{background:var(--bg);border:1px solid var(--bdr);}
-.typing{display:flex;gap:4px;padding:8px 12px;align-items:center;}
+.typing{display:flex;gap:4px;padding:8px 11px;align-items:center;}
 .typing span{width:6px;height:6px;background:var(--bdr);border-radius:50%;animation:bounce .9s ease-in-out infinite;}
 .typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
 @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
-.qwrap{padding:0 10px 7px;display:flex;gap:5px;flex-wrap:wrap;}
-.qbtn{padding:4px 10px;background:var(--bg);border:1px solid var(--bdr);border-radius:20px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .18s;font-family:'Noto Sans KR',sans-serif;white-space:nowrap;}
-.qbtn:hover{border-color:var(--pri);color:var(--pri);background:#f0f7fb;}
-.chat-nokey{padding:9px 12px;font-size:11px;color:#d97706;background:#fffbeb;border-top:1px solid #fde68a;text-align:center;display:none;}
-.chat-inp{padding:9px 10px;border-top:1px solid var(--bdr);display:flex;gap:6px;}
-.chat-inp input{flex:1;border:1.5px solid var(--bdr);border-radius:9px;padding:7px 11px;font-family:'Noto Sans KR',sans-serif;font-size:13px;outline:none;}
+.qwrap{padding:0 10px 6px;display:flex;gap:4px;flex-wrap:wrap;}
+.qbtn{padding:4px 9px;background:var(--bg);border:1px solid var(--bdr);border-radius:20px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .18s;font-family:'Noto Sans KR',sans-serif;white-space:nowrap;}
+.qbtn:hover{border-color:var(--pri);color:var(--pri);}
+.chat-nokey{padding:8px 12px;font-size:11px;color:#b45309;background:#fffbeb;border-top:1px solid #fde68a;text-align:center;display:none;}
+.chat-inp{padding:8px 10px;border-top:1px solid var(--bdr);display:flex;gap:6px;}
+.chat-inp input{flex:1;border:1.5px solid var(--bdr);border-radius:9px;padding:7px 10px;font-family:'Noto Sans KR',sans-serif;font-size:13px;outline:none;}
 .chat-inp input:focus{border-color:var(--pri-lt);}
-.send-btn{width:34px;height:34px;background:var(--pri);border:none;border-radius:8px;cursor:pointer;color:#fff;font-size:15px;display:flex;align-items:center;justify-content:center;}
+.send-btn{width:33px;height:33px;background:var(--pri);border:none;border-radius:8px;cursor:pointer;color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;}
 .send-btn:hover{background:var(--pri-lt);}
-
-/* ─── VITAL LEGEND ─── */
-.v-legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px;align-items:center;}
-.v-leg-item{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;}
-.v-leg-dot{width:10px;height:10px;border-radius:50%;}
-.vld-n{background:var(--v-normal);}
-.vld-w{background:var(--v-warn);}
-.vld-c{background:var(--v-crit);}
-
-/* SOUND TOGGLE */
-.sound-toggle{display:flex;align-items:center;gap:7px;padding:6px 12px;background:rgba(11,79,108,.06);border-radius:8px;border:1px solid var(--bdr);cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);transition:all .2s;margin-left:auto;}
-.sound-toggle.muted-state{color:var(--v-crit);border-color:var(--v-crit-br);background:var(--v-crit-bg);}
-.sound-toggle:hover{border-color:var(--pri);}
-
-@media print{.no-print{display:none!important;}.sbar-sec{break-inside:avoid;animation:none!important;opacity:1!important;transform:none!important;}body{background:#fff;}.hdr{position:relative;}.chat-fab,.chatbot{display:none!important;}}
-@media(max-width:768px){.fg{grid-template-columns:1fr;}.vital-grid{grid-template-columns:repeat(3,1fr);}.hdr{padding:0 11px;}.chatbot{width:calc(100vw - 26px);right:13px;}.wrap{padding:14px 10px 110px;}}
-::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px;}
+@media print{.no-print{display:none!important;}.sbar-sec{break-inside:avoid;animation:none!important;opacity:1!important;transform:none!important;}body{background:#fff;}.chat-fab,.chatbot{display:none!important;}}
+@media(max-width:768px){.fg{grid-template-columns:1fr;}.vital-grid{grid-template-columns:repeat(3,1fr);}.hdr{padding:0 10px;}.chatbot{width:calc(100vw - 26px);right:13px;}.wrap{padding:13px 10px 110px;}}
 </style>
 </head>
 <body>
-
-<!-- LOADING -->
-<div class="ld-ov" id="ldOv">
-  <div class="spinner"></div>
-  <div class="ld-msg" id="ldMsg">Gemini 2.5 Flash AI가 보고서를 작성 중…</div>
-  <div class="ld-sub">임상 간호사 관점에서 분석 중</div>
-</div>
-
-<!-- TOAST -->
+<div class="ld-ov" id="ldOv"><div class="spinner"></div><div class="ld-msg" id="ldMsg">처리 중…</div><div class="ld-sub" id="ldSub"></div></div>
 <div class="toast" id="toast"></div>
 
-<!-- HEADER -->
 <header class="hdr no-print">
   <div class="hdr-l">
-    <div class="hdr-logo">🏥</div>
+    <div class="hdr-logo"><img src="data:image/jpeg;base64,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" alt="제프리 교수"></div>
     <div>
       <div class="hdr-title">AI 기반 SBAR 자동 생성기</div>
-      <div class="hdr-sub">청암대학교 간호학과 · AI융합 간호정보학 · Gemini 2.5 Flash</div>
+      <div class="hdr-sub">청암대학교 간호학과 · 제프리 교수 · AI융합 간호정보학 · Gemini 2.5 Flash</div>
     </div>
   </div>
   <div class="hdr-r">
-    <div class="hdr-badge hbadge-off" id="hdrBadge">⚙️ 설정 필요</div>
-    <button class="hdr-btn no-print" onclick="openModal()">⚙️ API 설정</button>
+    <div class="hdr-badge hb-off" id="hdrBadge">⚙️ API 키 필요</div>
+    <button class="hdr-btn no-print" onclick="openModal()">⚙️ Gemini 설정</button>
+    <span id="adminBadge" class="admin-badge" style="display:none">🔑 관리자</span>
+    <button class="hdr-btn no-print" id="adminLoginBtn" onclick="openAdminModal()" title="관리자 로그인">🔐</button>
   </div>
 </header>
 
-<!-- SETTINGS MODAL -->
+<!-- GEMINI API MODAL ONLY -->
 <div class="modal-ov" id="settingsModal">
   <div class="modal">
-    <div class="modal-hdr">
-      <h3>⚙️ API / Firebase 설정</h3>
-      <button class="mc-btn" onclick="closeModal()">✕</button>
-    </div>
+    <div class="modal-hdr"><h3>⚙️ Gemini API 설정</h3><button class="mc-btn" onclick="closeModal()">✕</button></div>
     <div class="modal-body">
       <div class="m-sec">
         <h4>🤖 Gemini API (gemini-2.5-flash) &nbsp;<span id="gBadge" class="mbadge m-off">미설정</span></h4>
-        <div class="fld">
-          <label>API 키</label>
-          <div style="display:flex;gap:6px">
-            <input type="password" id="gKey" placeholder="AIzaSy..." style="flex:1" oninput="onGInput()">
-            <button class="btn btn-o btn-sm" onclick="tgVis()">👁️</button>
-          </div>
+        <div class="fld"><label>API 키</label>
+          <div style="display:flex;gap:6px"><input type="password" id="gKey" placeholder="AIzaSy..." style="flex:1" oninput="onGInput()"><button class="btn btn-o btn-sm" onclick="tgVis()">👁️</button></div>
         </div>
-        <p style="font-size:11px;color:var(--muted)">🔗 <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--pri)">Google AI Studio</a>에서 무료 발급</p>
+        <p style="font-size:11px;color:var(--muted)">🔗 <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--pri)">Google AI Studio</a> 무료 발급 · AI 데이터 입력, SBAR 생성, AI 채점, 챗봇에 사용</p>
       </div>
-      <div class="m-sec">
-        <h4>🔥 Firebase Firestore &nbsp;<span id="fbBadge" class="mbadge m-off">미설정</span></h4>
-        <p style="font-size:11px;color:var(--muted);margin-bottom:10px">미설정 시 로컬 저장(localStorage) 사용</p>
-        <div class="fb-grid">
-          <div class="fld"><label>API Key</label><input type="text" id="fbKey" placeholder="AIzaSy..."></div>
-          <div class="fld"><label>Project ID</label><input type="text" id="fbPid" placeholder="my-project-id"></div>
-          <div class="fld"><label>App ID</label><input type="text" id="fbAid" placeholder="1:123:web:abc"></div>
-          <div class="fld"><label>Auth Domain (선택)</label><input type="text" id="fbAdom" placeholder="project.firebaseapp.com"></div>
-        </div>
-        <p style="font-size:11px;color:var(--muted);margin-top:4px">🔗 <a href="https://console.firebase.google.com/" target="_blank" style="color:var(--pri)">Firebase Console</a> → 프로젝트 설정 → 웹앱 SDK</p>
+      <div style="background:#f0fdf4;border:1px solid var(--vnbr);border-radius:10px;padding:12px 14px;">
+        <p style="font-size:12px;font-weight:700;color:var(--vn);margin-bottom:4px">🔥 Firebase 자동 연결됨</p>
+        <p style="font-size:11px;color:var(--muted)">프로젝트 <strong>test-f9ug</strong>에 자동 연결됩니다. 별도 설정 불필요.</p>
       </div>
     </div>
-    <div class="modal-ft">
-      <button class="btn btn-o btn-sm" onclick="clearCfg()">🗑️ 초기화</button>
-      <button class="btn btn-p btn-sm" onclick="saveCfg()">💾 저장 및 적용</button>
-    </div>
+    <div class="modal-ft"><button class="btn btn-p btn-sm" onclick="saveCfg()">💾 저장</button></div>
   </div>
 </div>
 
-<!-- MAIN -->
+
+<!-- ADMIN PIN MODAL -->
+<div class="modal-ov" id="adminModal">
+  <div class="modal" style="max-width:320px">
+    <div class="modal-hdr"><h3 id="adminModalTitle">🔐 관리자 로그인</h3><button class="mc-btn" onclick="closeAdminModal()">✕</button></div>
+    <div class="modal-body" style="text-align:center;padding:20px 24px 24px">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:6px" id="adminModalSub">관리자 PIN을 입력하세요</p>
+      <div class="pin-dots" id="pinDots">
+        <div class="pin-dot" id="pd0"></div>
+        <div class="pin-dot" id="pd1"></div>
+        <div class="pin-dot" id="pd2"></div>
+        <div class="pin-dot" id="pd3"></div>
+      </div>
+      <div class="pin-pad">
+        <button class="pin-key" onclick="pinInput('1')">1</button>
+        <button class="pin-key" onclick="pinInput('2')">2</button>
+        <button class="pin-key" onclick="pinInput('3')">3</button>
+        <button class="pin-key" onclick="pinInput('4')">4</button>
+        <button class="pin-key" onclick="pinInput('5')">5</button>
+        <button class="pin-key" onclick="pinInput('6')">6</button>
+        <button class="pin-key" onclick="pinInput('7')">7</button>
+        <button class="pin-key" onclick="pinInput('8')">8</button>
+        <button class="pin-key" onclick="pinInput('9')">9</button>
+        <button class="pin-key del-key" onclick="pinLogout()" style="font-size:11px">로그아웃</button>
+        <button class="pin-key" onclick="pinInput('0')">0</button>
+        <button class="pin-key del-key" onclick="pinDelete()">⌫</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- SCORE MODAL -->
+<div class="modal-ov" id="scoreModal">
+  <div class="modal score-modal">
+    <div class="modal-hdr"><h3>🏆 AI SBAR 채점 결과</h3><button class="mc-btn" onclick="closeScoreModal()">✕</button></div>
+    <div class="modal-body" id="scoreContent" style="max-height:62vh;overflow-y:auto"></div>
+  </div>
+</div>
+
 <div class="wrap">
   <div class="tabs no-print">
     <button class="tab-btn active" onclick="goTab('input')">✏️ SBAR 작성</button>
@@ -349,126 +293,66 @@ textarea{resize:vertical;min-height:70px;line-height:1.65;}
     <button class="tab-btn" onclick="goTab('history')">📁 기록<span class="nbadge" id="histBadge" style="display:none">0</span></button>
   </div>
 
-  <!-- ═══ INPUT TAB ═══ -->
   <div id="tab-input">
-    <button class="demo-btn no-print" onclick="fillDemo()">🎯 데모 데이터 자동 입력 (폐렴 케이스)</button>
+    <button class="ai-demo-btn no-print" id="demoBtn" onclick="aiAutoFill()">
+      <span class="idle-ico">🎲</span><span class="spin-ico">⟳</span>
+      <span id="demoBtnTxt">AI 데이터 자동 입력</span>
+    </button>
 
-    <!-- 기본정보 -->
     <div class="card">
-      <div class="chdr"><div class="cico" style="background:#EFF6FF">👤</div><div><h3>환자 기본 정보</h3><p>Patient Identification</p></div></div>
+      <div class="chdr"><div class="cico" style="background:var(--bg2)">👤</div><div><h3>환자 기본 정보</h3><p>Patient Identification</p></div></div>
       <div class="fg">
         <div class="fgrp"><label>환자명 (이니셜)</label><input type="text" id="pName" placeholder="예: 홍○○"></div>
         <div class="fgrp"><label>나이 / 성별</label><div style="display:flex;gap:6px"><input type="number" id="pAge" placeholder="나이" style="width:64px"><select id="pGen" style="flex:1"><option value="">성별</option><option>여성</option><option>남성</option></select></div></div>
         <div class="fgrp"><label>병실 / 병상</label><input type="text" id="pRoom" placeholder="예: 305호 2번 병상"></div>
         <div class="fgrp"><label>담당 의사</label><input type="text" id="pDoc" placeholder="예: 이○○ 교수"></div>
-        <div class="fgrp"><label>진단명</label><input type="text" id="pDx" placeholder="예: 지역사회 획득 폐렴 (CAP)"></div>
+        <div class="fgrp"><label>진단명</label><input type="text" id="pDx" placeholder="예: 지역사회 획득 폐렴"></div>
         <div class="fgrp"><label>입원일</label><input type="date" id="pAdm"></div>
       </div>
     </div>
 
-    <!-- S - 현재상황 -->
     <div class="card">
-      <div class="chdr">
-        <div class="cico" style="background:var(--sbg);color:var(--sc);font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:14px">S</div>
-        <div><h3>S — Situation · 현재 상황</h3><p>지금 무슨 일이 일어나고 있는지</p></div>
-      </div>
-      <div class="fgrp" style="margin-bottom:14px">
-        <label>주호소 / 현재 상황</label>
-        <textarea id="sChief" rows="3" placeholder="예: 오후 2시경 갑자기 호흡 곤란 호소. 산소포화도 Room air에서 88%까지 저하됨."></textarea>
-      </div>
-
-      <!-- ═══ VITAL SIGNS ═══ -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+      <div class="chdr"><div class="cico" style="background:var(--sbg);color:var(--sc);font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:13px">S</div><div><h3>S — Situation · 현재 상황</h3><p>지금 무슨 일이 일어나고 있는지</p></div></div>
+      <div class="fgrp" style="margin-bottom:13px"><label>주호소 / 현재 상황</label><textarea id="sChief" rows="3" placeholder="예: 오후 2시경 호흡 곤란 호소. 산소포화도 88%까지 저하."></textarea></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;flex-wrap:wrap;gap:7px">
         <div class="sec-lbl" style="margin-bottom:0;flex:1">활력징후 (Vital Signs)</div>
-        <!-- Legend -->
-        <div class="v-legend">
-          <span class="v-leg-item"><span class="v-leg-dot vld-n"></span>정상</span>
-          <span class="v-leg-item"><span class="v-leg-dot vld-w"></span>주의</span>
-          <span class="v-leg-item"><span class="v-leg-dot vld-c"></span>위험</span>
-        </div>
-        <button class="sound-toggle" id="soundToggle" onclick="toggleSound()" title="위험 알림 사운드">🔔 알림음</button>
+        <div class="v-legend"><span class="v-leg-item"><span class="v-leg-dot vld-n"></span>정상</span><span class="v-leg-item"><span class="v-leg-dot vld-w"></span>주의</span><span class="v-leg-item"><span class="v-leg-dot vld-c"></span>위험</span></div>
+        <button class="snd-toggle" id="sndToggle" onclick="toggleSound()">🔔 알림음</button>
       </div>
-
       <div class="vital-grid">
-        <!-- BP -->
-        <div class="vbox" id="vbox-BP">
-          <div class="vbox-lbl">혈압 (BP)</div>
-          <div class="bp-row">
-            <input type="number" id="vSBP" placeholder="120" oninput="evalVitals()" title="수축기 혈압">
-            <span class="bp-sep">/</span>
-            <input type="number" id="vDBP" placeholder="80" oninput="evalVitals()" title="이완기 혈압">
-          </div>
-          <div class="vbox-unit">mmHg (수축기 / 이완기)</div>
-          <div class="vstatus vs-none" id="vs-BP">—</div>
-        </div>
-        <!-- HR -->
-        <div class="vbox" id="vbox-HR">
-          <div class="vbox-lbl">맥박 (HR)</div>
-          <input type="number" id="vHR" placeholder="72" oninput="evalVitals()">
-          <div class="vbox-unit">bpm</div>
-          <div class="vstatus vs-none" id="vs-HR">—</div>
-        </div>
-        <!-- RR -->
-        <div class="vbox" id="vbox-RR">
-          <div class="vbox-lbl">호흡수 (RR)</div>
-          <input type="number" id="vRR" placeholder="16" oninput="evalVitals()">
-          <div class="vbox-unit">회/분</div>
-          <div class="vstatus vs-none" id="vs-RR">—</div>
-        </div>
-        <!-- BT -->
-        <div class="vbox" id="vbox-BT">
-          <div class="vbox-lbl">체온 (BT)</div>
-          <input type="number" id="vBT" placeholder="36.5" step="0.1" oninput="evalVitals()">
-          <div class="vbox-unit">°C</div>
-          <div class="vstatus vs-none" id="vs-BT">—</div>
-        </div>
-        <!-- SpO2 -->
-        <div class="vbox" id="vbox-SP">
-          <div class="vbox-lbl">산소포화도</div>
-          <input type="number" id="vSp" placeholder="98" oninput="evalVitals()">
-          <div class="vbox-unit">SpO₂ (%)</div>
-          <div class="vstatus vs-none" id="vs-SP">—</div>
-        </div>
+        <div class="vbox" id="vbox-BP"><div class="vbox-lbl">혈압 (BP)</div><div class="bp-row"><input type="number" id="vSBP" placeholder="120" oninput="evalVitals()"><span class="bp-sep">/</span><input type="number" id="vDBP" placeholder="80" oninput="evalVitals()"></div><div class="vbox-unit">mmHg</div><div class="vstatus vs-none" id="vs-BP">—</div></div>
+        <div class="vbox" id="vbox-HR"><div class="vbox-lbl">맥박 (HR)</div><input type="number" id="vHR" placeholder="72" oninput="evalVitals()"><div class="vbox-unit">bpm</div><div class="vstatus vs-none" id="vs-HR">—</div></div>
+        <div class="vbox" id="vbox-RR"><div class="vbox-lbl">호흡수 (RR)</div><input type="number" id="vRR" placeholder="16" oninput="evalVitals()"><div class="vbox-unit">회/분</div><div class="vstatus vs-none" id="vs-RR">—</div></div>
+        <div class="vbox" id="vbox-BT"><div class="vbox-lbl">체온 (BT)</div><input type="number" id="vBT" placeholder="36.5" step="0.1" oninput="evalVitals()"><div class="vbox-unit">°C</div><div class="vstatus vs-none" id="vs-BT">—</div></div>
+        <div class="vbox" id="vbox-SP"><div class="vbox-lbl">SpO₂</div><input type="number" id="vSp" placeholder="98" oninput="evalVitals()"><div class="vbox-unit">%</div><div class="vstatus vs-none" id="vs-SP">—</div></div>
       </div>
+      <div class="vital-summary" id="vSummary" style="display:none"><span class="vs-lbl">📊</span><div id="vSummaryItems" style="display:flex;gap:10px;flex-wrap:wrap"></div></div>
+      <div class="fgrp" style="margin-top:10px"><label>의식 (GCS/LOC)</label><input type="text" id="vGCS" placeholder="예: 명료(Alert), GCS 15점"></div>
+    </div>
 
-      <!-- Vital Summary Bar -->
-      <div class="vital-summary" id="vitalSummary" style="display:none">
-        <span class="vs-label">📊 활력징후 요약</span>
-        <div id="vSummaryItems" style="display:flex;gap:12px;flex-wrap:wrap"></div>
-      </div>
-
-      <div class="fgrp gcs-row">
-        <label>의식 상태 (GCS / LOC)</label>
-        <input type="text" id="vGCS" placeholder="예: 명료(Alert), GCS 15점">
+    <div class="card">
+      <div class="chdr"><div class="cico" style="background:var(--bbg);color:var(--bc);font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:13px">B</div><div><h3>B — Background · 관련 배경</h3><p>임상적으로 관련된 과거력 및 치료 정보</p></div></div>
+      <div class="fg">
+        <div class="fgrp full"><label>과거력 / 기저질환</label><textarea id="bHist" rows="2" placeholder="예: 고혈압 10년, 당뇨 5년"></textarea></div>
+        <div class="fgrp full"><label>현재 복용 약물</label><textarea id="bMeds" rows="2" placeholder="예: Amlodipine 5mg QD, Metformin 500mg BID"></textarea></div>
+        <div class="fgrp"><label>알레르기</label><input type="text" id="bAl" placeholder="NKDA / 페니실린"></div>
+        <div class="fgrp"><label>최근 처치</label><input type="text" id="bProc" placeholder="예: 입원 2일차, IV 항생제 투여 중"></div>
       </div>
     </div>
 
-    <!-- B -->
     <div class="card">
-      <div class="chdr"><div class="cico" style="background:var(--bbg);color:var(--bc);font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:14px">B</div><div><h3>B — Background · 관련 배경</h3><p>임상적으로 관련된 과거력 및 치료 정보</p></div></div>
+      <div class="chdr"><div class="cico" style="background:var(--abg);color:var(--ac);font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:13px">A</div><div><h3>A — Assessment · 임상 사정</h3><p>간호사가 판단하는 문제</p></div></div>
       <div class="fg">
-        <div class="fgrp full"><label>과거력 / 기저질환</label><textarea id="bHist" rows="2" placeholder="예: 고혈압 10년, 당뇨 5년, 2022년 슬관절 전치환술"></textarea></div>
-        <div class="fgrp full"><label>현재 복용 약물</label><textarea id="bMeds" rows="2" placeholder="예: Amlodipine 5mg QD, Metformin 500mg BID, Aspirin 100mg QD"></textarea></div>
-        <div class="fgrp"><label>알레르기</label><input type="text" id="bAl" placeholder="예: 페니실린 발진 / NKDA"></div>
-        <div class="fgrp"><label>최근 처치 / 시술</label><input type="text" id="bProc" placeholder="예: 입원 2일차, IV 항생제 투여 중"></div>
-      </div>
-    </div>
-
-    <!-- A -->
-    <div class="card">
-      <div class="chdr"><div class="cico" style="background:var(--abg);color:var(--ac);font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:14px">A</div><div><h3>A — Assessment · 임상 사정</h3><p>간호사가 판단하는 문제</p></div></div>
-      <div class="fg">
-        <div class="fgrp full"><label>임상 증상 및 관찰 소견</label><textarea id="aFind" rows="3" placeholder="예: 보조호흡근 사용, 양폐야 수포음 청진, 빠른 얕은 호흡"></textarea></div>
-        <div class="fgrp full"><label>최근 검사 결과</label><textarea id="aLab" rows="2" placeholder="예: WBC 15,800 (↑), CRP 8.5 mg/dL (↑), Chest X-ray 우하엽 침윤"></textarea></div>
+        <div class="fgrp full"><label>임상 증상 / 관찰 소견</label><textarea id="aFind" rows="3" placeholder="예: 보조호흡근 사용, 양폐야 수포음 청진"></textarea></div>
+        <div class="fgrp full"><label>최근 검사 결과</label><textarea id="aLab" rows="2" placeholder="예: WBC 15,800↑, CRP 8.5↑, Chest X-ray 우하엽 침윤"></textarea></div>
         <div class="fgrp full"><label>간호사의 임상적 판단</label><input type="text" id="aImp" placeholder="예: 폐렴 악화로 인한 저산소혈증 진행 가능성 의심"></div>
       </div>
     </div>
 
-    <!-- R -->
     <div class="card">
-      <div class="chdr"><div class="cico" style="background:var(--rbg);color:var(--rc);font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:14px">R</div><div><h3>R — Recommendation · 권고 사항</h3><p>어떻게 해주기를 원하는가</p></div></div>
+      <div class="chdr"><div class="cico" style="background:var(--rbg);color:var(--rc);font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:13px">R</div><div><h3>R — Recommendation · 권고 사항</h3><p>어떻게 해주기를 원하는가</p></div></div>
       <div class="fg">
-        <div class="fgrp full"><label>요청 / 의뢰 내용</label><textarea id="rReq" rows="3" placeholder="예: 즉각적 평가 요청, 산소요법 처방, 항생제 변경 논의, 흉부 CT 지시"></textarea></div>
+        <div class="fgrp full"><label>요청 / 의뢰 내용</label><textarea id="rReq" rows="3" placeholder="예: 즉각적 평가 요청, 산소요법 처방, 항생제 변경 논의"></textarea></div>
         <div class="fgrp"><label>보고 대상</label><input type="text" id="rTo" placeholder="예: 당직 의사 / 주치의"></div>
         <div class="fgrp"><label>보고 일시</label><input type="datetime-local" id="rTime"></div>
       </div>
@@ -476,618 +360,517 @@ textarea{resize:vertical;min-height:70px;line-height:1.65;}
 
     <div class="gen-cta no-print">
       <button class="main-btn" onclick="generate()">🤖 Gemini 2.5 Flash로 SBAR 생성</button>
-      <small style="display:block;margin-top:8px;font-size:11px;color:var(--muted)">API 미설정 시 입력 데이터 구조화 자동 조합 · 우측 상단 ⚙️에서 Gemini API 키 설정</small>
-    </div>
-  </div><!-- /tab-input -->
-
-  <!-- ═══ RESULT TAB ═══ -->
-  <div id="tab-result" style="display:none">
-    <div id="resultArea">
-      <div class="empty"><div class="emo">📋</div><h3>생성된 보고서가 없습니다</h3><p>SBAR 작성 탭에서 생성 버튼을 클릭하세요</p></div>
+      <small style="display:block;margin-top:8px;font-size:11px;color:var(--muted)">API 키 미설정 시 입력 데이터 구조화 자동 조합 · 우측 상단 ⚙️에서 Gemini API 키 설정</small>
     </div>
   </div>
 
-  <!-- ═══ HISTORY TAB ═══ -->
+  <div id="tab-result" style="display:none"><div id="resultArea"><div class="empty"><div class="emo">📋</div><h3>생성된 보고서가 없습니다</h3><p>SBAR 작성 탭에서 생성 버튼을 클릭하세요</p></div></div></div>
+
   <div id="tab-history" style="display:none">
     <div class="card">
       <div class="chdr">
-        <div class="cico" style="background:#EFF6FF">📁</div>
-        <div><h3>저장된 SBAR 기록</h3><p id="storeLabel">로컬 저장 · 이 브라우저에만</p></div>
-        <div style="margin-left:auto;display:flex;gap:7px">
+        <div class="cico" style="background:var(--bg2)">📁</div>
+        <div><h3>저장된 SBAR 기록</h3><p>🔥 Firebase Firestore · test-f9ug</p></div>
+        <div style="margin-left:auto;display:flex;gap:6px">
+          <button class="btn btn-o btn-sm" onclick="exportCSV()">📊 CSV</button>
           <button class="btn btn-o btn-sm" onclick="loadHistory()">🔄</button>
-          <button class="btn btn-o btn-sm" onclick="clearAll()">🗑️ 전체 삭제</button>
+          <button class="btn btn-o btn-sm" id="clearAllBtn" onclick="clearAll()" style="display:none">🗑️ 전체 삭제</button>
         </div>
       </div>
-      <div id="histList"></div>
+      <div id="histList"><div class="empty"><div class="emo">🔥</div><h3>기록 탭을 열면 자동 로딩됩니다</h3></div></div>
     </div>
-  </div>
-</div><!-- /wrap -->
-
-<!-- CHATBOT FAB -->
-<button class="chat-fab no-print" id="chatFab" onclick="toggleChat()" title="AI 간호 도우미">
-  <span id="fabIcon">💬</span>
-</button>
-
-<!-- CHATBOT -->
-<div class="chatbot no-print" id="chatbot">
-  <div class="chat-hdr">
-    <div class="chat-av">🤖</div>
-    <div class="chat-info"><strong>SBAR AI 간호 도우미</strong><span>Gemini 2.5 Flash · 임상·SBAR 답변</span></div>
-    <button class="chat-x" onclick="toggleChat()">✕</button>
-  </div>
-  <div class="chat-msgs" id="chatMsgs">
-    <div class="msg bot"><div class="mav">🤖</div><div class="bubble">안녕하세요! SBAR 작성 및 임상 간호 질문에 답변드립니다. 상단 ⚙️에서 Gemini API 키 설정 후 AI 답변이 활성화됩니다. 💙</div></div>
-  </div>
-  <div id="typingRow" class="typing" style="display:none">
-    <div class="mav" style="width:24px;height:24px;border-radius:50%;background:var(--bg);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:12px">🤖</div>
-    <span></span><span></span><span></span>
-  </div>
-  <div class="qwrap" id="qWrap">
-    <button class="qbtn" onclick="qAsk('SBAR이란 무엇인가요?')">SBAR이란?</button>
-    <button class="qbtn" onclick="qAsk('S(Situation) 작성 핵심 팁')">S 작성법</button>
-    <button class="qbtn" onclick="qAsk('폐렴 환자 SBAR 예시')">폐렴 예시</button>
-    <button class="qbtn" onclick="qAsk('SpO₂가 낮을 때 간호 중재')">SpO₂↓ 중재</button>
-    <button class="qbtn" onclick="qAsk('활력징후 위험 범위를 알려주세요')">위험 수치</button>
-  </div>
-  <div class="chat-nokey" id="chatNoKey">⚠️ Gemini API 미설정 &mdash; <button onclick="openModal()" style="background:none;border:none;color:var(--pri);cursor:pointer;font-weight:700;font-size:11px;padding:0">⚙️ 설정</button></div>
-  <div class="chat-inp">
-    <input type="text" id="chatIn" placeholder="임상·SBAR 질문을 입력하세요…" onkeydown="if(event.key==='Enter')sendChat()">
-    <button class="send-btn" onclick="sendChat()">➤</button>
   </div>
 </div>
 
-<!-- ════════════ JAVASCRIPT ════════════ -->
+<button class="chat-fab no-print" id="chatFab" onclick="toggleChat()"><span id="fabIcon">💬</span></button>
+<div class="chatbot no-print" id="chatbot">
+  <div class="chat-hdr"><div class="chat-av">🤖</div><div class="chat-info"><strong>SBAR AI 간호 도우미</strong><span>Gemini 2.5 Flash · 임상·SBAR 답변</span></div><button class="chat-x" onclick="toggleChat()">✕</button></div>
+  <div class="chat-msgs" id="chatMsgs"><div class="msg bot"><div class="mav">🤖</div><div class="bubble">안녕하세요! SBAR 작성 및 임상 간호 질문에 답변드립니다. ⚙️ Gemini API 키를 설정하면 AI 답변이 활성화됩니다. 🌿</div></div></div>
+  <div id="typingRow" class="typing" style="display:none"><div class="mav" style="width:23px;height:23px;border-radius:50%;background:var(--bg);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:11px">🤖</div><span></span><span></span><span></span></div>
+  <div class="qwrap" id="qWrap">
+    <button class="qbtn" onclick="qAsk('SBAR이란 무엇인가요?')">SBAR이란?</button>
+    <button class="qbtn" onclick="qAsk('S 항목 핵심 작성법')">S 작성법</button>
+    <button class="qbtn" onclick="qAsk('패혈증 환자 SBAR 예시')">패혈증 예시</button>
+    <button class="qbtn" onclick="qAsk('SpO₂ 90% 미만 시 간호 중재')">SpO₂↓ 중재</button>
+    <button class="qbtn" onclick="qAsk('활력징후 정상 범위를 알려주세요')">정상 범위</button>
+  </div>
+  <div class="chat-nokey" id="chatNoKey">⚠️ Gemini API 미설정 — <button onclick="openModal()" style="background:none;border:none;color:var(--pri);cursor:pointer;font-weight:700;font-size:11px;padding:0">⚙️ 설정</button></div>
+  <div class="chat-inp"><input type="text" id="chatIn" placeholder="간호·SBAR 질문을 입력하세요…" onkeydown="if(event.key==='Enter')sendChat()"><button class="send-btn" onclick="sendChat()">➤</button></div>
+</div>
+
 <script>
-/* ─── GLOBALS ─── */
-const MODEL = 'gemini-2.5-flash';
-let fbApp=null, fbDb=null;
-let currentReport=null;
-let chatHistory=[];
-let chatIsOpen=false;
-let gVisible=false;
-let soundEnabled=true;
-let lastCritState=false;
-let _histCache=[], _histIsFb=false;
-let audioCtx=null;
-
-/* ─── INIT ─── */
-document.getElementById('rTime').value=new Date().toISOString().slice(0,16);
-document.getElementById('pAdm').value=new Date().toISOString().slice(0,10);
-(function init(){
-  const c=getCfg();
-  if(c.gKey){document.getElementById('gKey').value=c.gKey; updateGBadge(c.gKey);}
-  if(c.fbKey) document.getElementById('fbKey').value=c.fbKey;
-  if(c.fbPid) document.getElementById('fbPid').value=c.fbPid;
-  if(c.fbAid) document.getElementById('fbAid').value=c.fbAid;
-  if(c.fbAdom) document.getElementById('fbAdom').value=c.fbAdom;
-  if(c.fbKey&&c.fbPid) waitFb(c);
-  updateHdrBadge(); refreshBadge(); updateChatNoKey();
-})();
-
-/* ─── VITAL SIGN EVALUATION ─── */
-// Status: 'normal'|'warn'|'crit'|'none'
-const VITAL_RANGES = {
-  SBP: { normal:[90,139], warn_lo:[80,89], warn_hi:[140,159], crit_lo:[null,79], crit_hi:[160,null] },
-  DBP: { normal:[60,89],  warn_lo:[50,59], warn_hi:[90,99],  crit_lo:[null,49], crit_hi:[100,null] },
-  HR:  { normal:[60,100], warn_lo:[50,59], warn_hi:[101,119],crit_lo:[null,49], crit_hi:[120,null] },
-  RR:  { normal:[12,20],  warn_lo:[10,11], warn_hi:[21,25],  crit_lo:[null,9],  crit_hi:[26,null] },
-  BT:  { normal:[36.0,37.4], warn_lo:[35.5,35.9], warn_hi:[37.5,38.4], crit_lo:[null,35.4], crit_hi:[38.5,null] },
-  SP:  { normal:[95,100], warn_lo:[90,94], crit_lo:[null,89] },
+/* ── FIREBASE CONFIG ── */
+const FB_CFG={
+  apiKey:'',  /* UI에서 입력 */
+  projectId:'test-f9ug',
+  appId:'1:853330608980:web:4c2a098c646d8740e0bec1',
+  authDomain:'test-f9ug.firebaseapp.com'
 };
 
-function classifyVal(key, val){
-  if(val===null||isNaN(val)) return 'none';
-  const r=VITAL_RANGES[key];
-  // Check critical first
-  if(r.crit_lo && r.crit_lo[1]!==null && val <= r.crit_lo[1]) return 'crit';
-  if(r.crit_hi && r.crit_hi[0]!==null && val >= r.crit_hi[0]) return 'crit';
-  // Check warning
-  if(r.warn_lo && r.warn_lo[0]!==null && val >= r.warn_lo[0] && val <= r.warn_lo[1]) return 'warn';
-  if(r.warn_hi && r.warn_hi[0]!==null && val >= r.warn_hi[0] && r.warn_hi[1]!==null && val <= r.warn_hi[1]) return 'warn';
-  if(r.warn_hi && r.warn_hi[0]!==null && r.warn_hi[1]===null && val >= r.warn_hi[0]) return 'warn';
-  // Normal range
-  if(r.normal && val >= r.normal[0] && val <= r.normal[1]) return 'normal';
-  return 'none';
+const MODEL='gemini-2.5-flash';
+let fbApp=null,fbDb=null,currentReport=null,chatHistory=[];
+let chatIsOpen=false,gVisible=false,soundEnabled=true,lastCritState=false;
+let _histCache=[],audioCtx=null;
+
+/* INIT */
+(function(){
+  document.getElementById('rTime').value=new Date().toISOString().slice(0,16);
+  document.getElementById('pAdm').value=new Date().toISOString().slice(0,10);
+  var k=localStorage.getItem('sbar_gkey')||'';
+  if(k){document.getElementById('gKey').value=k;updateGBadge(k);}
+  updateHdrBadge(k);updateChatNoKey(k);
+  waitFb();
+  applyAdminUI();
+})();
+
+/* FIREBASE */
+function waitFb(t){
+  t=t||0;
+  if(window._fbReady)initFb();
+  else if(t<30)setTimeout(function(){waitFb(t+1);},300);
+}
+function initFb(){
+  try{
+    var m=window._fb;
+    var ex=m.getApps().find(function(a){return a.name==='sbar';});
+    fbApp=ex||m.initializeApp(FB_CFG,'sbar');
+    fbDb=m.getFirestore(fbApp);
+    refreshBadge();
+    showToast('🔥 Firebase 연결됨 (test-f9ug)');
+  }catch(e){console.error('FB:',e);showToast('⚠️ Firebase 오류: '+e.message,'warn');}
+}
+function fbSave(r){
+  if(!fbDb)return Promise.resolve(false);
+  return window._fb.addDoc(window._fb.collection(fbDb,'sbar_records'),r)
+    .then(function(){return true;}).catch(function(){return false;});
+}
+function fbLoad(){
+  if(!fbDb)return Promise.resolve(null);
+  var q=window._fb.query(window._fb.collection(fbDb,'sbar_records'),window._fb.orderBy('ts','desc'),window._fb.limit(100));
+  return window._fb.getDocs(q).then(function(s){
+    return s.docs.map(function(d){return Object.assign({},d.data(),{_id:d.id});});
+  }).catch(function(){return null;});
+}
+function fbDel(id){
+  if(!fbDb||!id)return Promise.resolve();
+  return window._fb.deleteDoc(window._fb.doc(fbDb,'sbar_records',id)).catch(function(){});
 }
 
-const STATUS_LABELS = { normal:'정상', warn:'주의', crit:'위험', none:'—' };
-const STATUS_ICONS  = { normal:'✅', warn:'⚠️', crit:'🚨', none:'' };
-const STATUS_CSS    = { normal:'vs-normal', warn:'vs-warn', crit:'vs-crit', none:'vs-none' };
-const BOX_CSS       = { normal:'v-normal', warn:'v-warn', crit:'v-crit', none:'' };
+/* VITALS */
+var VR={
+  SBP:{normal:[90,139],warn_lo:[80,89],warn_hi:[140,159],crit_lo:[null,79],crit_hi:[160,null]},
+  DBP:{normal:[60,89],warn_lo:[50,59],warn_hi:[90,99],crit_lo:[null,49],crit_hi:[100,null]},
+  HR:{normal:[60,100],warn_lo:[50,59],warn_hi:[101,119],crit_lo:[null,49],crit_hi:[120,null]},
+  RR:{normal:[12,20],warn_lo:[10,11],warn_hi:[21,25],crit_lo:[null,9],crit_hi:[26,null]},
+  BT:{normal:[36.0,37.4],warn_lo:[35.5,35.9],warn_hi:[37.5,38.4],crit_lo:[null,35.4],crit_hi:[38.5,null]},
+  SP:{normal:[95,100],warn_lo:[90,94],crit_lo:[null,89]}
+};
+function classify(key,val){
+  if(val===null||isNaN(val))return'none';
+  var r=VR[key];
+  if(r.crit_lo&&r.crit_lo[1]!==null&&val<=r.crit_lo[1])return'crit';
+  if(r.crit_hi&&r.crit_hi[0]!==null&&val>=r.crit_hi[0])return'crit';
+  if(r.warn_lo&&r.warn_lo[0]!==null&&val>=r.warn_lo[0]&&val<=r.warn_lo[1])return'warn';
+  if(r.warn_hi&&r.warn_hi[0]!==null&&val>=r.warn_hi[0]&&(r.warn_hi[1]===null||val<=r.warn_hi[1]))return'warn';
+  if(r.normal&&val>=r.normal[0]&&val<=r.normal[1])return'normal';
+  return'none';
+}
+var SL={normal:'정상',warn:'주의',crit:'위험',none:'—'};
+var SI={normal:'✅',warn:'⚠️',crit:'🚨',none:''};
+var SC={normal:'vs-normal',warn:'vs-warn',crit:'vs-crit',none:'vs-none'};
 
 function evalVitals(){
-  const sbp = parseFloat(document.getElementById('vSBP').value);
-  const dbp = parseFloat(document.getElementById('vDBP').value);
-  const hr  = parseFloat(document.getElementById('vHR').value);
-  const rr  = parseFloat(document.getElementById('vRR').value);
-  const bt  = parseFloat(document.getElementById('vBT').value);
-  const sp  = parseFloat(document.getElementById('vSp').value);
-
-  const sbpS=classifyVal('SBP',sbp), dbpS=classifyVal('DBP',dbp);
-  const hrS=classifyVal('HR',hr), rrS=classifyVal('RR',rr);
-  const btS=classifyVal('BT',bt), spS=classifyVal('SP',sp);
-
-  // BP: take the worse of SBP and DBP
-  const bpPriority=['crit','warn','normal','none'];
-  const bpS = bpPriority[Math.min(bpPriority.indexOf(sbpS), bpPriority.indexOf(dbpS))];
-
-  const vitals = [
-    {id:'BP', status:bpS, label:`BP ${isNaN(sbp)?'?':sbp}/${isNaN(dbp)?'?':dbp} mmHg`},
-    {id:'HR', status:hrS, label:`HR ${isNaN(hr)?'?':hr} bpm`},
-    {id:'RR', status:rrS, label:`RR ${isNaN(rr)?'?':rr}/분`},
-    {id:'BT', status:btS, label:`BT ${isNaN(bt)?'?':bt}°C`},
-    {id:'SP', status:spS, label:`SpO₂ ${isNaN(sp)?'?':sp}%`},
+  var sbp=parseFloat(document.getElementById('vSBP').value);
+  var dbp=parseFloat(document.getElementById('vDBP').value);
+  var hr=parseFloat(document.getElementById('vHR').value);
+  var rr=parseFloat(document.getElementById('vRR').value);
+  var bt=parseFloat(document.getElementById('vBT').value);
+  var sp=parseFloat(document.getElementById('vSp').value);
+  var pr=['crit','warn','normal','none'];
+  var ss=classify('SBP',sbp),ds=classify('DBP',dbp);
+  var bpS=pr[Math.min(pr.indexOf(ss),pr.indexOf(ds))];
+  var vitals=[
+    {id:'BP',s:bpS,lbl:'BP '+(isNaN(sbp)?'?':sbp)+'/'+(isNaN(dbp)?'?':dbp)+'mmHg'},
+    {id:'HR',s:classify('HR',hr),lbl:'HR '+(isNaN(hr)?'?':hr)+'bpm'},
+    {id:'RR',s:classify('RR',rr),lbl:'RR '+(isNaN(rr)?'?':rr)+'/분'},
+    {id:'BT',s:classify('BT',bt),lbl:'BT '+(isNaN(bt)?'?':bt)+'°C'},
+    {id:'SP',s:classify('SP',sp),lbl:'SpO₂ '+(isNaN(sp)?'?':sp)+'%'}
   ];
-
-  let hasCrit=false, hasWarn=false;
-
-  vitals.forEach(v=>{
-    const box=document.getElementById('vbox-'+v.id);
-    const badge=document.getElementById('vs-'+v.id);
-    if(!box||!badge) return;
-    // Reset box classes
-    box.className='vbox';
-    if(v.status!=='none') box.classList.add('v-'+v.status);
-    // Badge
-    badge.className='vstatus '+STATUS_CSS[v.status];
-    badge.innerHTML=v.status!=='none'?`${STATUS_ICONS[v.status]} ${STATUS_LABELS[v.status]}`:'—';
-    if(v.status==='crit') hasCrit=true;
-    if(v.status==='warn') hasWarn=true;
+  var hasCrit=false;
+  vitals.forEach(function(v){
+    var box=document.getElementById('vbox-'+v.id),badge=document.getElementById('vs-'+v.id);
+    if(!box||!badge)return;
+    box.className='vbox';if(v.s!=='none')box.classList.add('v-'+v.s);
+    badge.className='vstatus '+SC[v.s];
+    badge.innerHTML=v.s!=='none'?SI[v.s]+' '+SL[v.s]:'—';
+    if(v.s==='crit')hasCrit=true;
   });
-
-  // Summary bar
-  const summaryBar=document.getElementById('vitalSummary');
-  const summaryItems=document.getElementById('vSummaryItems');
-  const hasAny=vitals.some(v=>v.status!=='none');
-  summaryBar.style.display=hasAny?'flex':'none';
-  if(hasAny){
-    summaryItems.innerHTML=vitals.filter(v=>v.status!=='none').map(v=>`
-      <div class="vs-item">
-        <span class="vs-dot ${v.status==='normal'?'vs-dot-ok':v.status==='warn'?'vs-dot-warn':'vs-dot-crit'}"></span>
-        <span>${v.label}</span>
-      </div>`).join('');
-  }
-
-  // Critical alert sound
-  if(hasCrit && !lastCritState && soundEnabled){
-    playCritAlert();
-  }
+  var hasAny=vitals.some(function(v){return v.s!=='none';});
+  document.getElementById('vSummary').style.display=hasAny?'flex':'none';
+  if(hasAny)document.getElementById('vSummaryItems').innerHTML=vitals.filter(function(v){return v.s!=='none';}).map(function(v){
+    return '<div class="vs-item"><span class="vs-dot '+(v.s==='normal'?'vs-dot-ok':v.s==='warn'?'vs-dot-warn':'vs-dot-crit')+'"></span><span>'+v.lbl+'</span></div>';
+  }).join('');
+  if(hasCrit&&!lastCritState&&soundEnabled)playCritAlert();
   lastCritState=hasCrit;
 }
-
-/* ─── WEB AUDIO ALERT ─── */
-function getAudioCtx(){
-  if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-  return audioCtx;
-}
-
+function getACtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
 function playCritAlert(){
   try{
-    const ctx=getAudioCtx();
-    // Urgent triple beep
-    [0, 0.25, 0.5].forEach(delay=>{
-      const osc=ctx.createOscillator();
-      const gain=ctx.createGain();
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.frequency.setValueAtTime(880, ctx.currentTime+delay);
-      osc.frequency.setValueAtTime(1100, ctx.currentTime+delay+0.05);
-      gain.gain.setValueAtTime(0.4, ctx.currentTime+delay);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+delay+0.18);
-      osc.start(ctx.currentTime+delay);
-      osc.stop(ctx.currentTime+delay+0.2);
+    var ctx=getACtx();
+    [0,.25,.5].forEach(function(d){
+      var o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.frequency.setValueAtTime(880,ctx.currentTime+d);
+      o.frequency.setValueAtTime(1100,ctx.currentTime+d+.05);
+      g.gain.setValueAtTime(.4,ctx.currentTime+d);
+      g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+d+.18);
+      o.start(ctx.currentTime+d);o.stop(ctx.currentTime+d+.2);
     });
-  }catch(e){ console.warn('Audio error:',e); }
-}
-
-function playWarnTone(){
-  try{
-    const ctx=getAudioCtx();
-    const osc=ctx.createOscillator();
-    const gain=ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.frequency.value=660;
-    gain.gain.setValueAtTime(0.25, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.3);
-    osc.start(ctx.currentTime); osc.stop(ctx.currentTime+0.35);
   }catch(e){}
 }
-
 function toggleSound(){
   soundEnabled=!soundEnabled;
-  const btn=document.getElementById('soundToggle');
+  var btn=document.getElementById('sndToggle');
   btn.innerHTML=soundEnabled?'🔔 알림음':'🔕 무음';
-  btn.className='sound-toggle'+(soundEnabled?'':' muted-state');
+  btn.className='snd-toggle'+(soundEnabled?'':' muted-st');
   showToast(soundEnabled?'🔔 위험 알림음 활성화':'🔕 알림음 꺼짐');
 }
 
-/* ─── CONFIG ─── */
-function getCfg(){ return JSON.parse(localStorage.getItem('sbar_cfg')||'{}'); }
-function openModal(){ document.getElementById('settingsModal').classList.add('on'); }
-function closeModal(){ document.getElementById('settingsModal').classList.remove('on'); }
-function onGInput(){ updateGBadge(document.getElementById('gKey').value); }
-function tgVis(){ gVisible=!gVisible; document.getElementById('gKey').type=gVisible?'text':'password'; }
-
+/* CONFIG - Gemini only */
+function getKey(){return localStorage.getItem('sbar_gkey')||'';}
+function openModal(){document.getElementById('settingsModal').classList.add('on');}
+function closeModal(){document.getElementById('settingsModal').classList.remove('on');}
+function onGInput(){updateGBadge(document.getElementById('gKey').value);}
+function tgVis(){gVisible=!gVisible;document.getElementById('gKey').type=gVisible?'text':'password';}
 function saveCfg(){
-  const cfg={
-    gKey:document.getElementById('gKey').value.trim(),
-    fbKey:document.getElementById('fbKey').value.trim(),
-    fbPid:document.getElementById('fbPid').value.trim(),
-    fbAid:document.getElementById('fbAid').value.trim(),
-    fbAdom:document.getElementById('fbAdom').value.trim(),
-  };
-  localStorage.setItem('sbar_cfg',JSON.stringify(cfg));
-  updateGBadge(cfg.gKey);
-  if(cfg.fbKey&&cfg.fbPid) waitFb(cfg);
-  updateHdrBadge(); closeModal();
-  showToast('💾 설정 저장됨');
-  updateChatNoKey();
+  var k=document.getElementById('gKey').value.trim();
+  localStorage.setItem('sbar_gkey',k);
+  updateGBadge(k);updateHdrBadge(k);updateChatNoKey(k);
+  closeModal();showToast('💾 Gemini API 키 저장됨');
 }
-
-function clearCfg(){
-  if(!confirm('설정을 초기화할까요?')) return;
-  localStorage.removeItem('sbar_cfg');
-  ['gKey','fbKey','fbPid','fbAid','fbAdom'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  fbApp=null; fbDb=null;
-  updateGBadge(''); updateFbBadge(false); updateHdrBadge(); updateChatNoKey();
-  showToast('설정 초기화됨');
-}
-
 function updateGBadge(k){
-  const el=document.getElementById('gBadge');
-  if(k&&k.startsWith('AIza')){ el.className='mbadge m-ai'; el.textContent='🟢 연결됨'; }
-  else if(k){ el.className='mbadge m-err'; el.textContent='❌ 키 오류'; }
-  else { el.className='mbadge m-off'; el.textContent='미설정'; }
+  var el=document.getElementById('gBadge');
+  if(k&&k.startsWith('AIza')){el.className='mbadge m-ai';el.textContent='🟢 연결됨';}
+  else if(k){el.className='mbadge m-off';el.textContent='❌ 키 오류';}
+  else{el.className='mbadge m-off';el.textContent='미설정';}
 }
-function updateFbBadge(ok){
-  const el=document.getElementById('fbBadge');
-  if(ok){ el.className='mbadge m-ok'; el.textContent='🔥 연결됨'; document.getElementById('storeLabel').textContent='Firebase Firestore 저장'; }
-  else { el.className='mbadge m-off'; el.textContent='미설정'; document.getElementById('storeLabel').textContent='로컬 저장 · 이 브라우저에만'; }
+function updateHdrBadge(k){
+  var el=document.getElementById('hdrBadge');
+  if(k&&k.startsWith('AIza')){el.className='hdr-badge hb-ok';el.textContent='🤖 Gemini 2.5 + 🔥 Firebase';}
+  else{el.className='hdr-badge hb-off';el.textContent='⚙️ Gemini API 키 필요';}
 }
-function updateHdrBadge(){
-  const c=getCfg(); const el=document.getElementById('hdrBadge');
-  const hG=c.gKey&&c.gKey.startsWith('AIza'), hF=c.fbKey&&c.fbPid;
-  if(hG&&hF){ el.className='hdr-badge hbadge-ok'; el.textContent='🤖 Gemini 2.5 + 🔥 Firebase'; }
-  else if(hG){ el.className='hdr-badge hbadge-ok'; el.textContent='🤖 Gemini 2.5 Flash 활성'; }
-  else { el.className='hdr-badge hbadge-off'; el.textContent='⚙️ 설정 필요'; }
-}
-function updateChatNoKey(){
-  const k=getCfg().gKey||'';
+function updateChatNoKey(k){
   document.getElementById('chatNoKey').style.display=(!k||!k.startsWith('AIza'))?'block':'none';
 }
 
-/* ─── FIREBASE ─── */
-function waitFb(cfg,t=0){
-  if(window._fbReady) initFb(cfg);
-  else if(t<20) setTimeout(()=>waitFb(cfg,t+1),300);
-}
-async function initFb(cfg){
-  try{
-    const {initializeApp,getApps,getFirestore}=window._fb;
-    const existing=getApps().find(a=>a.name==='sbar-app');
-    fbApp=existing||initializeApp({
-      apiKey:cfg.fbKey,
-      authDomain:cfg.fbAdom||`${cfg.fbPid}.firebaseapp.com`,
-      projectId:cfg.fbPid,
-      appId:cfg.fbAid
-    },'sbar-app');
-    fbDb=getFirestore(fbApp);
-    updateFbBadge(true); refreshBadge();
-    showToast('🔥 Firebase 연결 성공');
-  }catch(e){ console.error(e); updateFbBadge(false); showToast('⚠️ Firebase 연결 실패','warn'); }
-}
-async function fbSave(r){ if(!fbDb) return false; try{ await window._fb.addDoc(window._fb.collection(fbDb,'sbar_records'),r); return true; }catch(e){ return false; } }
-async function fbLoad(){ if(!fbDb) return null; try{ const q=window._fb.query(window._fb.collection(fbDb,'sbar_records'),window._fb.orderBy('ts','desc'),window._fb.limit(100)); const s=await window._fb.getDocs(q); return s.docs.map(d=>({...d.data(),_id:d.id})); }catch(e){ return null; } }
-async function fbDel(id){ if(!fbDb||!id) return; try{ await window._fb.deleteDoc(window._fb.doc(fbDb,'sbar_records',id)); }catch(e){} }
-
-/* ─── TABS ─── */
+/* TABS */
 function goTab(t){
-  ['input','result','history'].forEach(id=>{ document.getElementById('tab-'+id).style.display=id===t?'block':'none'; });
-  document.querySelectorAll('.tab-btn').forEach((b,i)=>{ b.classList.toggle('active',['input','result','history'][i]===t); });
-  if(t==='history') loadHistory();
+  ['input','result','history'].forEach(function(id){
+    document.getElementById('tab-'+id).style.display=id===t?'block':'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach(function(b,i){
+    b.classList.toggle('active',['input','result','history'][i]===t);
+  });
+  if(t==='history')loadHistory();
 }
 
-/* ─── DEMO ─── */
-function fillDemo(){
-  const f=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v;};
-  f('pName','김○○'); f('pAge','68'); document.getElementById('pGen').value='여성';
-  f('pRoom','305호 2번 병상'); f('pDoc','이○○ 교수');
-  f('pDx','지역사회 획득 폐렴 (Community-acquired Pneumonia)');
-  f('pAdm',new Date(Date.now()-2*86400000).toISOString().slice(0,10));
-  f('sChief','오늘 오후 2시경 갑자기 호흡 곤란 호소. 산소포화도 Room air에서 88%까지 저하됨. 말하기 힘들다고 함.');
-  f('vSBP','148'); f('vDBP','92'); f('vHR','108'); f('vRR','26'); f('vBT','38.7'); f('vSp','88');
-  f('vGCS','명료(Alert), 불안 양상');
-  f('bHist','고혈압 10년, 제2형 당뇨병 5년, 2022년 좌측 슬관절 전치환술');
-  f('bMeds','Amlodipine 5mg QD, Metformin 500mg BID, Aspirin 100mg QD');
-  f('bAl','NKDA'); f('bProc','입원 2일차, Ampicillin-sulbactam 3g q8h IV 투여 중, NC 2L/min 적용 중');
-  f('aFind','청색증 없으나 보조호흡근 사용 관찰. 양폐야 하부 수포음(crackles) 청진. 빠른 얕은 호흡.');
-  f('aLab','WBC 15,800/μL(↑), CRP 8.5mg/dL(↑), Procalcitonin 1.2ng/mL(↑)\nChest X-ray: 우하엽 침윤 소견 악화\nABG(room air): PaO₂ 68mmHg');
-  f('aImp','폐렴 악화로 인한 저산소혈증 진행 중. 현 항생제 호전 불충분 가능성.');
-  f('rReq','즉각적인 환자 평가 요청. 산소 유량 증량(NC→마스크 변경) 처방. 흉부 CT 및 항생제 변경 논의. 혈액 배양 추가.');
-  f('rTo','당직 의사');
-  evalVitals(); // trigger vital evaluation
-  showToast('✅ 데모 데이터 입력 완료 (활력징후 상태 확인하세요)');
+/* AI AUTO FILL */
+/* ── 관리자 PIN (변경하려면 이 값을 수정하세요) ── */
+var ADMIN_PIN='7254';
+var _pinBuf='';
+var _adminMode=sessionStorage.getItem('sbar_admin')==='1';
+
+function openAdminModal(){
+  _pinBuf='';updatePinDots();
+  if(_adminMode){
+    document.getElementById('adminModalTitle').textContent='🔐 관리자 모드';
+    document.getElementById('adminModalSub').textContent='로그아웃하려면 아래 버튼을 누르세요';
+  } else {
+    document.getElementById('adminModalTitle').textContent='🔐 관리자 로그인';
+    document.getElementById('adminModalSub').textContent='관리자 PIN을 입력하세요';
+  }
+  document.getElementById('adminModal').classList.add('on');
 }
-
-/* ─── COLLECT FORM ─── */
-function collect(){
-  const g=id=>document.getElementById(id)?.value?.trim()||'';
-  return{
-    pName:g('pName'),pAge:g('pAge'),pGender:document.getElementById('pGen').value,
-    pRoom:g('pRoom'),pDoc:g('pDoc'),pDx:g('pDx'),pAdm:g('pAdm'),
-    sChief:g('sChief'),
-    vSBP:g('vSBP'),vDBP:g('vDBP'),vHR:g('vHR'),vRR:g('vRR'),vBT:g('vBT'),vSp:g('vSp'),vGCS:g('vGCS'),
-    bHist:g('bHist'),bMeds:g('bMeds'),bAl:g('bAl'),bProc:g('bProc'),
-    aFind:g('aFind'),aLab:g('aLab'),aImp:g('aImp'),
-    rReq:g('rReq'),rTo:g('rTo'),rTime:g('rTime')
-  };
-}
-
-/* ─── GENERATE ─── */
-async function generate(){
-  const d=collect();
-  if(!d.sChief&&!d.pDx){ showToast('⚠️ 주호소 또는 진단명 입력 필요','warn'); return; }
-  const k=getCfg().gKey||'';
-  if(k&&k.startsWith('AIza')) await geminiGen(d,k);
-  else manualGen(d);
-}
-
-async function geminiGen(d,key){
-  setLoading(true,'Gemini 2.5 Flash AI가 보고서를 작성 중…');
-  const days=d.pAdm?Math.floor((Date.now()-new Date(d.pAdm))/86400000)+1:null;
-  const bp=d.vSBP&&d.vDBP?`${d.vSBP}/${d.vDBP}mmHg`:'미측정';
-  const vt=`혈압:${bp}, 맥박:${d.vHR||'미측정'}bpm, 호흡수:${d.vRR||'미측정'}회/분, 체온:${d.vBT||'미측정'}°C, SpO₂:${d.vSp||'미측정'}%${d.vGCS?`, 의식:${d.vGCS}`:''}`;
-  const prompt=`당신은 한국 병원의 숙련된 임상 간호사입니다. 아래 환자 정보를 바탕으로 전문적인 SBAR 보고서를 작성하고 JSON 객체만 반환하세요. 마크다운 코드블록 없이 JSON만 응답합니다.
-
-환자: ${d.pName||'?'}(${d.pAge||'?'}세 ${d.pGender||''}) | 병실:${d.pRoom||'-'} | 담당의:${d.pDoc||'-'}
-진단: ${d.pDx||'-'}${days?` | 입원 ${days}일차`:''}
-현재 상황: ${d.sChief||'미입력'}
-활력징후: ${vt}
-과거력: ${d.bHist||'없음'} | 복용 약물: ${d.bMeds||'없음'} | 알레르기: ${d.bAl||'NKDA'}
-최근 처치: ${d.bProc||'없음'}
-임상 소견: ${d.aFind||'-'} | 검사: ${d.aLab||'없음'} | 판단: ${d.aImp||'-'}
-요청 내용: ${d.rReq||'-'} | 보고 대상: ${d.rTo||'-'}
-
-반환 형식 (JSON only):
-{"S":"","B":"","A":"","R":""}
-
-작성 기준:
-- S: 환자 식별 + 현재 상황 + 활력징후 요약 (2~4문장, 수치 명시)
-- B: 과거력·약물·처치 경과 등 임상 배경 (2~4문장)
-- A: 관찰 소견 + 검사 결과 + 간호사의 임상적 사정 (2~4문장)
-- R: 구체적 요청 사항과 우선순위 (1~3문장)`;
-
-  try{
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${key}`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        contents:[{parts:[{text:prompt}]}],
-        generationConfig:{temperature:0.3,maxOutputTokens:1500,thinkingConfig:{thinkingBudget:0}}
-      })
-    });
-    if(!res.ok){ const e=await res.json(); throw new Error(e.error?.message||'HTTP '+res.status); }
-    const data=await res.json();
-    const raw=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
-    const clean=raw.replace(/```json|```/g,'').trim();
-    const sbar=JSON.parse(clean);
-    finish(d,sbar,'Gemini 2.5 Flash');
-  }catch(e){
-    showToast('⚠️ Gemini 오류: '+e.message+' → 수동 생성','warn');
-    manualGen(d);
-  }finally{ setLoading(false); }
-}
-
-function manualGen(d){
-  const days=d.pAdm?Math.floor((Date.now()-new Date(d.pAdm))/86400000)+1:null;
-  const bp=d.vSBP&&d.vDBP?`혈압 ${d.vSBP}/${d.vDBP}mmHg`:(d.vSBP?`수축기혈압 ${d.vSBP}mmHg`:'');
-  const vt=[bp,d.vHR&&`맥박 ${d.vHR}bpm`,d.vRR&&`호흡수 ${d.vRR}회/분`,d.vBT&&`체온 ${d.vBT}°C`,d.vSp&&`SpO₂ ${d.vSp}%`].filter(Boolean).join(', ');
-  const sbar={
-    S:[`${d.pName||'환자'}(${d.pAge||'?'}세 ${d.pGender||''})님`,d.pRoom?` ${d.pRoom} 입원`:'',d.pDx?`, ${d.pDx}${days?` 입원 ${days}일차`:''}입니다. `:'.',d.sChief?`현재 ${d.sChief}. `:'',vt?`활력징후: ${vt}${d.vGCS?`, 의식 ${d.vGCS}`:''}.`:''].filter(Boolean).join(''),
-    B:[d.bHist?`과거력: ${d.bHist}. `:'',d.bMeds?`복용 약물: ${d.bMeds}. `:'',d.bAl?`알레르기: ${d.bAl}. `:'',d.bProc?`${d.bProc}.`:''].filter(Boolean).join('')||'특이 과거력 없음.',
-    A:[d.aFind?`${d.aFind} `:'',d.aLab?`검사: ${d.aLab}. `:'',d.aImp?`판단: ${d.aImp}.`:''].filter(Boolean).join('')||'임상 소견 추가 확인 요함.',
-    R:[d.rReq?`${d.rReq} `:'',d.rTo?`${d.rTo}의 즉각적 평가와 지시를 요청합니다.`:'담당 의사의 즉각적 평가를 요청합니다.'].filter(Boolean).join(''),
-  };
-  finish(d,sbar,'수동 생성');
-}
-
-function finish(d,sbar,mode){
-  currentReport={...d,sbar,mode,ts:new Date().toISOString()};
-  renderResult(currentReport);
-  goTab('result');
-  showToast(mode.includes('Gemini')?'🤖 Gemini 2.5 Flash 보고서 생성 완료':'📋 보고서 생성 완료');
-}
-
-/* ─── RENDER RESULT ─── */
-function renderResult(r){
-  const {pName,pAge,pGender,pRoom,pDoc,pDx,sbar,mode,ts,rTime,rTo}=r;
-  const tStr=rTime?new Date(rTime).toLocaleString('ko-KR'):new Date(ts).toLocaleString('ko-KR');
-  const days=r.pAdm?Math.floor((Date.now()-new Date(r.pAdm))/86400000)+1:null;
-  const isAI=mode&&mode.includes('Gemini');
-  const secs=[
-    {k:'S',lbl:'Situation',desc:'현재 상황',cls:'ss',hint:'지금 무슨 일이 일어나고 있는지'},
-    {k:'B',lbl:'Background',desc:'관련 배경',cls:'sb',hint:'임상적으로 관련된 배경 정보'},
-    {k:'A',lbl:'Assessment',desc:'임상 사정',cls:'sa',hint:'나는 이 문제가 무엇이라고 생각하는가'},
-    {k:'R',lbl:'Recommendation',desc:'권고 사항',cls:'sr',hint:'어떻게 해주기를 원하는가'},
-  ];
-  document.getElementById('resultArea').innerHTML=`
-  <div class="pt-banner no-print">
-    <div style="font-size:32px">👤</div>
-    <div style="flex:1">
-      <div class="pt-name">${pName||'환자'} ${pAge?`(${pAge}세 ${pGender||''})`:''}</div>
-      <div class="pt-detail">${pDx||''}${days?` · 입원 ${days}일차`:''}${pRoom?` · ${pRoom}`:''}${pDoc?` · 담당: ${pDoc}`:''}</div>
-    </div>
-    <div class="pt-meta">📅 ${tStr}<br>${rTo?`📢 ${rTo} 보고<br>`:''}
-      <span class="mbadge ${isAI?'m-ai':'m-ok'}" style="font-size:10px;margin-top:4px;display:inline-flex">${isAI?'🤖 Gemini 2.5 Flash':'📝 수동'}</span>
-    </div>
-  </div>
-  <div class="act-bar no-print">
-    <button class="btn btn-g btn-sm" onclick="saveRecord()">💾 저장</button>
-    <button class="btn btn-o btn-sm" onclick="copyAll()">📋 복사</button>
-    <button class="btn btn-o btn-sm" onclick="exportPDF()">📄 PDF</button>
-    <button class="btn btn-o btn-sm" onclick="window.print()">🖨️ 인쇄</button>
-    <button class="btn btn-o btn-sm" id="editBtn" onclick="toggleEdit()">✏️ 수정</button>
-    <button class="btn btn-o btn-sm" onclick="goTab('input')">↩️ 재작성</button>
-  </div>
-  <div id="editInd" style="display:none" class="no-print"><span class="edit-ind">✏️ 수정 모드 — 텍스트 직접 편집 · 「완료」 클릭 시 저장</span></div>
-  <div id="sbarSecs">
-    ${secs.map(s=>`
-    <div class="sbar-sec ${s.cls}">
-      <div class="sbar-hd"><div class="skey">${s.k}</div><div class="sht"><h4>${s.lbl} · ${s.desc}</h4><p>${s.hint}</p></div></div>
-      <div class="sbar-body" id="sb-${s.k}">${sbar[s.k]||'—'}</div>
-    </div>`).join('')}
-  </div>
-  <div style="text-align:center;padding:13px;font-size:11px;color:var(--muted)" class="no-print">청암대학교 간호학과 · AI융합 간호정보학 · 담당교수: 제프리 교수</div>`;
-}
-
-/* ─── EDIT ─── */
-let editMode=false;
-function toggleEdit(){
-  editMode=!editMode;
-  ['S','B','A','R'].forEach(k=>{ const el=document.getElementById('sb-'+k); if(el) el.contentEditable=editMode?'true':'false'; });
-  document.getElementById('editInd').style.display=editMode?'block':'none';
-  document.getElementById('editBtn').textContent=editMode?'✅ 완료':'✏️ 수정';
-  if(!editMode&&currentReport){
-    ['S','B','A','R'].forEach(k=>{ const el=document.getElementById('sb-'+k); if(el) currentReport.sbar[k]=el.innerText; });
-    showToast('✅ 수정 반영됨');
+function closeAdminModal(){document.getElementById('adminModal').classList.remove('on');}
+function pinInput(n){
+  if(_adminMode)return;
+  if(_pinBuf.length>=4)return;
+  _pinBuf+=n;updatePinDots();
+  if(_pinBuf.length===4){
+    if(_pinBuf===ADMIN_PIN){
+      _adminMode=true;sessionStorage.setItem('sbar_admin','1');
+      closeAdminModal();applyAdminUI();showToast('🔑 관리자 모드 활성화');
+    } else {
+      var pd=document.getElementById('pinDots');
+      pd.classList.add('pin-shake');
+      setTimeout(function(){pd.classList.remove('pin-shake');_pinBuf='';updatePinDots();},400);
+      showToast('❌ PIN이 올바르지 않습니다','err');
+    }
   }
 }
+function pinDelete(){if(_adminMode)return;_pinBuf=_pinBuf.slice(0,-1);updatePinDots();}
+function pinLogout(){
+  _adminMode=false;sessionStorage.removeItem('sbar_admin');
+  _pinBuf='';closeAdminModal();applyAdminUI();showToast('로그아웃되었습니다');
+}
+function updatePinDots(){
+  for(var i=0;i<4;i++){
+    var d=document.getElementById('pd'+i);
+    if(d)d.className='pin-dot'+(i<_pinBuf.length?' filled':'');
+  }
+}
+function applyAdminUI(){
+  var isAdmin=_adminMode;
+  document.getElementById('adminBadge').style.display=isAdmin?'flex':'none';
+  document.getElementById('adminLoginBtn').textContent=isAdmin?'🔓':'🔐';
+  document.getElementById('clearAllBtn').style.display=isAdmin?'inline-flex':'none';
+  /* 기록 목록 재렌더 (삭제 버튼 show/hide) */
+  if(_histCache.length>0)renderHist(_histCache);
+}
 
-/* ─── COPY ─── */
+var SCENARIOS=['급성 심근경색','패혈증','뇌졸중 허혈성','급성 신부전','당뇨병성 케톤산증','급성 폐부종','위장관 출혈','고혈압 응급','급성 호흡부전','심부전 악화','뇌수막염','폐색전증','저혈당 쇼크','아나필락시스 반응','욕창 3도 감염','낙상 후 골절 의심','수술 후 무기폐','요로감염 패혈증','심방세동 빈맥','수혈 부작용'];
+function aiAutoFill(){
+  var key=getKey();
+  if(!key||!key.startsWith('AIza')){showToast('⚠️ Gemini API 키 설정 후 사용 가능','warn');openModal();return;}
+  var btn=document.getElementById('demoBtn');
+  btn.classList.add('loading');document.getElementById('demoBtnTxt').textContent='AI 케이스 생성 중…';
+  var sc=SCENARIOS[Math.floor(Math.random()*SCENARIOS.length)];
+  var prompt='당신은 한국 임상 간호 교육 전문가입니다. 아래 시나리오로 SBAR 실습용 가상 환자 데이터를 JSON으로 생성하세요. 마크다운 없이 JSON만 응답합니다.\n\n시나리오: '+sc+'\n\n{"pName":"이니셜","pAge":숫자,"pGender":"여성 또는 남성","pRoom":"병실","pDoc":"의사이니셜","pDx":"진단명","pAdmDays":숫자1-7,"sChief":"현재상황 2-3문장","vSBP":숫자,"vDBP":숫자,"vHR":숫자,"vRR":숫자,"vBT":소수점1자리,"vSp":숫자,"vGCS":"의식상태","bHist":"과거력","bMeds":"약물","bAl":"알레르기","bProc":"처치","aFind":"소견 2-3문장","aLab":"검사결과","aImp":"간호사판단","rReq":"요청사항","rTo":"보고대상"}\n\n주의: 해당 시나리오에 맞는 이상 활력징후로 설정하세요.';
+  fetch('https://generativelanguage.googleapis.com/v1beta/models/'+MODEL+':generateContent?key='+key,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.9,maxOutputTokens:900,thinkingConfig:{thinkingBudget:0}}})
+  }).then(function(r){return r.json();}).then(function(data){
+    var raw=data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]?data.candidates[0].content.parts[0].text:'';
+    var d=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    var f=function(id,v){var el=document.getElementById(id);if(el)el.value=v||'';};
+    f('pName',d.pName);f('pAge',d.pAge);document.getElementById('pGen').value=d.pGender||'';
+    f('pRoom',d.pRoom);f('pDoc',d.pDoc);f('pDx',d.pDx);
+    var admDate=new Date(Date.now()-((d.pAdmDays||1)-1)*86400000).toISOString().slice(0,10);
+    f('pAdm',admDate);f('sChief',d.sChief);f('vSBP',d.vSBP);f('vDBP',d.vDBP);
+    f('vHR',d.vHR);f('vRR',d.vRR);f('vBT',d.vBT);f('vSp',d.vSp);f('vGCS',d.vGCS);
+    f('bHist',d.bHist);f('bMeds',d.bMeds);f('bAl',d.bAl);f('bProc',d.bProc);
+    f('aFind',d.aFind);f('aLab',d.aLab);f('aImp',d.aImp);f('rReq',d.rReq);f('rTo',d.rTo);
+    evalVitals();showToast('🎲 AI 케이스: '+sc);
+  }).catch(function(e){showToast('⚠️ 오류: '+e.message,'warn');})
+  .finally(function(){btn.classList.remove('loading');document.getElementById('demoBtnTxt').textContent='AI 데이터 자동 입력';});
+}
+
+/* COLLECT */
+function collect(){
+  var g=function(id){return(document.getElementById(id)||{}).value?document.getElementById(id).value.trim():'';};
+  return{pName:g('pName'),pAge:g('pAge'),pGender:document.getElementById('pGen').value,pRoom:g('pRoom'),pDoc:g('pDoc'),pDx:g('pDx'),pAdm:g('pAdm'),sChief:g('sChief'),vSBP:g('vSBP'),vDBP:g('vDBP'),vHR:g('vHR'),vRR:g('vRR'),vBT:g('vBT'),vSp:g('vSp'),vGCS:g('vGCS'),bHist:g('bHist'),bMeds:g('bMeds'),bAl:g('bAl'),bProc:g('bProc'),aFind:g('aFind'),aLab:g('aLab'),aImp:g('aImp'),rReq:g('rReq'),rTo:g('rTo'),rTime:g('rTime')};
+}
+
+/* GENERATE */
+function generate(){
+  var d=collect();
+  if(!d.sChief&&!d.pDx){showToast('⚠️ 주호소 또는 진단명 입력 필요','warn');return;}
+  var k=getKey();
+  if(k&&k.startsWith('AIza'))geminiGen(d,k);else manualGen(d);
+}
+function geminiGen(d,key){
+  setLoading(true,'Gemini 2.5 Flash로 SBAR 생성 중…','임상 간호사 관점 분석');
+  var days=d.pAdm?Math.floor((Date.now()-new Date(d.pAdm))/86400000)+1:null;
+  var bp=d.vSBP&&d.vDBP?d.vSBP+'/'+d.vDBP+'mmHg':'미측정';
+  var vt='혈압:'+bp+', 맥박:'+(d.vHR||'미측정')+'bpm, 호흡수:'+(d.vRR||'미측정')+'회/분, 체온:'+(d.vBT||'미측정')+'°C, SpO₂:'+(d.vSp||'미측정')+'%'+(d.vGCS?', 의식:'+d.vGCS:'');
+  var prompt='숙련된 한국 임상 간호사로서 SBAR 보고서를 작성하고 JSON만 반환하세요. 마크다운 없이 JSON만 응답합니다.\n\n환자:'+(d.pName||'?')+'('+(d.pAge||'?')+'세 '+(d.pGender||'')+') 병실:'+(d.pRoom||'-')+' 담당의:'+(d.pDoc||'-')+' 진단:'+(d.pDx||'-')+(days?' 입원'+days+'일차':'')+'\n현황:'+(d.sChief||'미입력')+' 활력징후:'+vt+'\n과거력:'+(d.bHist||'없음')+' 약물:'+(d.bMeds||'없음')+' 알레르기:'+(d.bAl||'NKDA')+' 처치:'+(d.bProc||'없음')+'\n소견:'+(d.aFind||'-')+' 검사:'+(d.aLab||'없음')+' 판단:'+(d.aImp||'-')+'\n요청:'+(d.rReq||'-')+' 대상:'+(d.rTo||'-')+'\n\n{"S":"","B":"","A":"","R":""}\nS:환자식별+현황+활력징후(2-4문장), B:배경+치료경과(2-4문장), A:소견+검사+사정(2-4문장), R:구체적요청(1-3문장)';
+  fetch('https://generativelanguage.googleapis.com/v1beta/models/'+MODEL+':generateContent?key='+key,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.3,maxOutputTokens:1500,thinkingConfig:{thinkingBudget:0}}})
+  }).then(function(r){
+    if(!r.ok)return r.json().then(function(e){throw new Error(e.error&&e.error.message?e.error.message:'HTTP '+r.status);});
+    return r.json();
+  }).then(function(data){
+    var raw=data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts[0]?data.candidates[0].content.parts[0].text:'';
+    var sbar=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    finish(d,sbar,'Gemini 2.5 Flash');
+  }).catch(function(e){showToast('⚠️ Gemini 오류: '+e.message+' → 수동 생성','warn');manualGen(d);})
+  .finally(function(){setLoading(false);});
+}
+function manualGen(d){
+  var days=d.pAdm?Math.floor((Date.now()-new Date(d.pAdm))/86400000)+1:null;
+  var bp=d.vSBP&&d.vDBP?'혈압 '+d.vSBP+'/'+d.vDBP+'mmHg':'';
+  var vt=[bp,d.vHR&&'맥박 '+d.vHR+'bpm',d.vRR&&'호흡수 '+d.vRR+'회/분',d.vBT&&'체온 '+d.vBT+'°C',d.vSp&&'SpO₂ '+d.vSp+'%'].filter(Boolean).join(', ');
+  finish(d,{
+    S:[(d.pName||'환자')+'('+(d.pAge||'?')+'세 '+(d.pGender||'')+')',d.pRoom?' '+d.pRoom:' 입원',d.pDx?', '+d.pDx+(days?' 입원 '+days+'일차':'')+'입니다. ':'.',d.sChief?'현재 '+d.sChief+'. ':'',vt?'활력징후: '+vt+(d.vGCS?', 의식 '+d.vGCS:'')+'. ':''].filter(Boolean).join(''),
+    B:[d.bHist?'과거력: '+d.bHist+'. ':'',d.bMeds?'복용약물: '+d.bMeds+'. ':'',d.bAl?'알레르기: '+d.bAl+'. ':'',d.bProc?d.bProc+'.':''].filter(Boolean).join('')||'특이 과거력 없음.',
+    A:[d.aFind?d.aFind+' ':'',d.aLab?'검사: '+d.aLab+'. ':'',d.aImp?'판단: '+d.aImp+'.':''].filter(Boolean).join('')||'임상 소견 확인 요함.',
+    R:[d.rReq?d.rReq+' ':'',d.rTo?d.rTo+'의 즉각적 평가와 지시를 요청합니다.':'담당 의사의 즉각적 평가를 요청합니다.'].join('')
+  },'수동 생성');
+}
+function finish(d,sbar,mode){
+  currentReport=Object.assign({},d,{sbar:sbar,mode:mode,ts:new Date().toISOString()});
+  renderResult(currentReport);goTab('result');
+  showToast(mode.includes('Gemini')?'🤖 Gemini 2.5 SBAR 생성 완료':'📋 보고서 생성 완료');
+}
+
+/* RENDER */
+function renderResult(r){
+  var tS=r.rTime?new Date(r.rTime).toLocaleString('ko-KR'):new Date(r.ts).toLocaleString('ko-KR');
+  var days=r.pAdm?Math.floor((Date.now()-new Date(r.pAdm))/86400000)+1:null;
+  var isAI=r.mode&&r.mode.includes('Gemini');
+  var secs=[{k:'S',lbl:'Situation',desc:'현재 상황',cls:'ss',hint:'지금 무슨 일이 일어나고 있는지'},{k:'B',lbl:'Background',desc:'관련 배경',cls:'sb',hint:'임상적으로 관련된 배경 정보'},{k:'A',lbl:'Assessment',desc:'임상 사정',cls:'sa',hint:'나는 이 문제가 무엇이라고 생각하는가'},{k:'R',lbl:'Recommendation',desc:'권고 사항',cls:'sr',hint:'어떻게 해주기를 원하는가'}];
+  document.getElementById('resultArea').innerHTML=
+  '<div class="pt-banner no-print"><div style="font-size:30px">👤</div><div style="flex:1"><div class="pt-name">'+(r.pName||'환자')+' '+(r.pAge?'('+r.pAge+'세 '+(r.pGender||'')+')':'')+'</div><div class="pt-detail">'+(r.pDx||'')+(days?' · 입원 '+days+'일차':'')+(r.pRoom?' · '+r.pRoom:'')+(r.pDoc?' · 담당: '+r.pDoc:'')+'</div></div><div class="pt-meta">📅 '+tS+'<br>'+(r.rTo?'📢 '+r.rTo+' 보고<br>':'')+'<span class="mbadge '+(isAI?'m-ai':'m-ok')+'" style="font-size:10px;margin-top:4px;display:inline-flex">'+(isAI?'🤖 Gemini 2.5':'📝 수동')+'</span></div></div>'+
+  '<div class="act-bar no-print"><button class="btn btn-g btn-sm" onclick="saveRecord()">💾 저장</button><button class="btn btn-score btn-sm" onclick="scoreSBAR()">🏆 AI 채점</button><button class="btn btn-o btn-sm" onclick="copyAll()">📋 복사</button><button class="btn btn-o btn-sm" onclick="exportPDF()">📄 PDF</button><button class="btn btn-o btn-sm" onclick="window.print()">🖨️ 인쇄</button><button class="btn btn-o btn-sm" id="editBtn" onclick="toggleEdit()">✏️ 수정</button><button class="btn btn-o btn-sm" onclick="goTab(\'input\')">↩️ 재작성</button></div>'+
+  '<div id="editInd" style="display:none" class="no-print"><span class="edit-ind">✏️ 수정 모드 · 텍스트 직접 편집 · 「완료」클릭 시 반영</span></div>'+
+  '<div id="sbarSecs">'+secs.map(function(s){return'<div class="sbar-sec '+s.cls+'"><div class="sbar-hd"><div class="skey">'+s.k+'</div><div class="sht"><h4>'+s.lbl+' · '+s.desc+'</h4><p>'+s.hint+'</p></div></div><div class="sbar-body" id="sb-'+s.k+'">'+(r.sbar[s.k]||'—')+'</div></div>';}).join('')+'</div>'+
+  '<div style="text-align:center;padding:12px;font-size:11px;color:var(--muted)" class="no-print">청암대학교 간호학과 · 제프리 교수 · AI융합 간호정보학</div>';
+}
+
+/* EDIT */
+var editMode=false;
+function toggleEdit(){
+  editMode=!editMode;
+  ['S','B','A','R'].forEach(function(k){var el=document.getElementById('sb-'+k);if(el)el.contentEditable=editMode?'true':'false';});
+  document.getElementById('editInd').style.display=editMode?'block':'none';
+  document.getElementById('editBtn').textContent=editMode?'✅ 완료':'✏️ 수정';
+  if(!editMode&&currentReport){['S','B','A','R'].forEach(function(k){var el=document.getElementById('sb-'+k);if(el)currentReport.sbar[k]=el.innerText;});showToast('✅ 수정 반영됨');}
+}
+
+/* COPY */
 function copyAll(){
-  if(!currentReport) return;
-  const {pName,pAge,pGender,pDx,sbar,rTime,rTo}=currentReport;
-  const txt=`[SBAR 보고서]\n환자: ${pName||'?'}(${pAge||'?'}세 ${pGender||''}) / 진단: ${pDx||''}\n보고일시: ${rTime?new Date(rTime).toLocaleString('ko-KR'):'미입력'} / 보고 대상: ${rTo||'미입력'}\n\n■ S (Situation)\n${sbar.S}\n\n■ B (Background)\n${sbar.B}\n\n■ A (Assessment)\n${sbar.A}\n\n■ R (Recommendation)\n${sbar.R}\n\n— 청암대학교 간호학과 AI SBAR 생성기 (Gemini 2.5 Flash) —`;
-  navigator.clipboard.writeText(txt).then(()=>showToast('📋 클립보드에 복사됨'));
+  if(!currentReport)return;
+  var r=currentReport;
+  var txt='[SBAR 보고서]\n환자: '+(r.pName||'?')+'('+(r.pAge||'?')+'세 '+(r.pGender||'')+') / 진단: '+(r.pDx||'')+'\n보고일시: '+(r.rTime?new Date(r.rTime).toLocaleString('ko-KR'):'미입력')+' / 대상: '+(r.rTo||'미입력')+'\n\n■ S\n'+r.sbar.S+'\n\n■ B\n'+r.sbar.B+'\n\n■ A\n'+r.sbar.A+'\n\n■ R\n'+r.sbar.R+'\n\n— 청암대학교 간호학과 · 제프리 교수 · AI 기반 SBAR 자동 생성기 —';
+  navigator.clipboard.writeText(txt).then(function(){showToast('📋 복사됨');});
 }
 
-/* ─── PDF ─── */
+/* PDF */
 function exportPDF(){
-  const el=document.getElementById('sbarSecs');
-  if(!el){ showToast('❌ 보고서 없음','err'); return; }
-  const fn=`SBAR_${currentReport?.pName||'report'}_${new Date().toISOString().slice(0,10)}.pdf`;
-  html2pdf().from(el).set({
-    margin:[12,12,12,12],filename:fn,
-    image:{type:'jpeg',quality:.97},
-    html2canvas:{scale:2,useCORS:true,logging:false},
-    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
-  }).save().then(()=>showToast('✅ PDF 저장됨')).catch(()=>showToast('❌ PDF 실패 — 인쇄 이용','err'));
+  var el=document.getElementById('sbarSecs');if(!el){showToast('❌ 보고서 없음','err');return;}
+  var fn='SBAR_'+(currentReport?currentReport.pName||'report':'report')+'_'+new Date().toISOString().slice(0,10)+'.pdf';
+  html2pdf().from(el).set({margin:[12,12,12,12],filename:fn,image:{type:'jpeg',quality:.97},html2canvas:{scale:2,useCORS:true,logging:false},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).save()
+    .then(function(){showToast('✅ PDF 저장됨');}).catch(function(){showToast('❌ PDF 실패','err');});
 }
 
-/* ─── SAVE/HISTORY ─── */
-async function saveRecord(){
-  if(!currentReport) return;
-  if(fbDb){ const ok=await fbSave(currentReport); if(ok){ showToast('🔥 Firebase에 저장됨'); refreshBadge(); return; } }
-  const h=JSON.parse(localStorage.getItem('sbar_v2')||'[]');
-  h.unshift({...currentReport,_lid:Date.now()});
-  if(h.length>100) h.pop();
-  localStorage.setItem('sbar_v2',JSON.stringify(h));
-  refreshBadge(); showToast('💾 로컬 저장됨');
+/* AI SCORE */
+function scoreSBAR(){
+  if(!currentReport){showToast('먼저 보고서를 생성하세요','warn');return;}
+  var key=getKey();if(!key||!key.startsWith('AIza')){showToast('⚠️ Gemini API 키 필요','warn');openModal();return;}
+  document.getElementById('scoreModal').classList.add('on');
+  document.getElementById('scoreContent').innerHTML='<div style="text-align:center;padding:36px 20px"><div class="spinner" style="margin:0 auto 14px;border-top-color:var(--pri)"></div><div style="font-size:14px;font-weight:600;color:var(--muted)">AI가 채점 중입니다…</div></div>';
+  var sbar=currentReport.sbar;
+  var prompt='당신은 한국 간호교육 전문가입니다. 아래 SBAR 보고서를 각 25점 만점으로 채점하고 피드백을 제공하세요. JSON만 응답합니다.\n\nS: '+sbar.S+'\nB: '+sbar.B+'\nA: '+sbar.A+'\nR: '+sbar.R+'\n\n{"sScore":숫자0-25,"sComment":"S 피드백","bScore":숫자0-25,"bComment":"B 피드백","aScore":숫자0-25,"aComment":"A 피드백","rScore":숫자0-25,"rComment":"R 피드백","overall":"전체 평가 2-3문장"}';
+  fetch('https://generativelanguage.googleapis.com/v1beta/models/'+MODEL+':generateContent?key='+key,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.2,maxOutputTokens:900,thinkingConfig:{thinkingBudget:0}}})
+  }).then(function(r){return r.json();}).then(function(data){
+    var raw=data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts[0]?data.candidates[0].content.parts[0].text:'';
+    renderScore(JSON.parse(raw.replace(/```json|```/g,'').trim()));
+  }).catch(function(e){document.getElementById('scoreContent').innerHTML='<div class="empty"><div class="emo">❌</div><h3>채점 오류</h3><p>'+e.message+'</p></div>';});
+}
+function renderScore(sc){
+  var total=(sc.sScore||0)+(sc.bScore||0)+(sc.aScore||0)+(sc.rScore||0);
+  var grade=total>=90?'수':total>=80?'우':total>=70?'미':total>=60?'양':'가';
+  var gc=total>=90?'#16a34a':total>=80?'#2563eb':total>=70?'#d97706':total>=60?'#ea580c':'#dc2626';
+  var scs=[{k:'S',lbl:'Situation',score:sc.sScore,comment:sc.sComment,color:'#1d4ed8'},{k:'B',lbl:'Background',score:sc.bScore,comment:sc.bComment,color:'#6d28d9'},{k:'A',lbl:'Assessment',score:sc.aScore,comment:sc.aComment,color:'#b45309'},{k:'R',lbl:'Recommendation',score:sc.rScore,comment:sc.rComment,color:'#065f46'}];
+  var h='<div class="score-total-box"><div class="score-num" style="color:'+gc+'">'+total+'</div><div style="font-size:13px;color:var(--muted);margin:3px 0">/100점</div><div class="score-grade" style="background:'+gc+'22;border:2px solid '+gc+'44;color:'+gc+'">'+grade+'등급</div><div class="score-overall">'+(sc.overall||'')+'</div></div>';
+  scs.forEach(function(s){
+    var pct=Math.round((s.score/25)*100);
+    var fc=pct>=88?'#16a34a':pct>=72?'#2563eb':pct>=60?'#d97706':'#dc2626';
+    h+='<div class="score-sec"><div class="score-sec-hdr"><div class="score-key" style="background:'+s.color+'">'+s.k+'</div><div class="score-lbl">'+s.lbl+'</div><div class="score-val" style="color:'+fc+'">'+s.score+'<span style="font-size:11px;color:var(--muted);font-weight:400">/25</span></div></div><div class="score-bar-bg"><div class="score-bar-fill" style="width:0;background:'+fc+'" data-pct="'+pct+'"></div></div><div class="score-comment">'+(s.comment||'')+'</div></div>';
+  });
+  h+='<div style="margin-top:14px;text-align:center"><button class="btn btn-o btn-sm" onclick="closeScoreModal()">닫기</button></div>';
+  document.getElementById('scoreContent').innerHTML=h;
+  setTimeout(function(){document.querySelectorAll('.score-bar-fill').forEach(function(el){el.style.width=el.getAttribute('data-pct')+'%';});},100);
+}
+function closeScoreModal(){document.getElementById('scoreModal').classList.remove('on');}
+
+/* SAVE / HISTORY */
+function saveRecord(){
+  if(!currentReport)return;
+  if(!fbDb){showToast('⚠️ Firebase 연결 중입니다. 잠시 후 다시 시도하세요','warn');return;}
+  fbSave(currentReport).then(function(ok){
+    if(ok){showToast('🔥 Firebase에 저장됨');refreshBadge();}
+    else showToast('❌ 저장 실패 — Firestore 보안 규칙 확인','err');
+  });
+}
+function loadHistory(){
+  if(!fbDb){document.getElementById('histList').innerHTML='<div class="empty"><div class="emo">⏳</div><h3>Firebase 연결 중…</h3><p>잠시 후 새로고침 해주세요</p></div>';return;}
+  fbLoad().then(function(recs){
+    if(recs)renderHist(recs);
+    else document.getElementById('histList').innerHTML='<div class="empty"><div class="emo">⚠️</div><h3>불러오기 실패</h3><p>Firestore 보안 규칙을 확인하세요</p></div>';
+  });
+}
+function renderHist(list){
+  _histCache=list;var cont=document.getElementById('histList');
+  if(!list||!list.length){cont.innerHTML='<div class="empty"><div class="emo">📂</div><h3>저장된 기록 없음</h3><p>보고서 생성 후 저장 버튼을 클릭하세요</p></div>';return;}
+  cont.innerHTML=list.map(function(r,i){
+    var isAI=r.mode&&r.mode.includes('Gemini');
+    var delBtn=_adminMode?'<button class="btn btn-xs" style="padding:4px 9px;color:#dc2626;border:1.5px solid #fca5a5;background:#fff1f2;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;" onclick="event.stopPropagation();delRec('+i+')">🗑️ 삭제</button>':'';
+    return'<div class="hist-item" onclick="loadRec('+i+')"><div class="hist-ico">🏥</div><div style="flex:1"><div style="font-size:14px;font-weight:600">'+(r.pName||'환자')+' ('+(r.pAge||'?')+'세 '+(r.pGender||'')+')</div><div style="font-size:11px;color:var(--muted);margin-top:2px">'+(r.pDx||'진단 없음')+(r.pRoom?' · '+r.pRoom:'')+' <span class="mbadge '+(isAI?'m-ai':'m-ok')+'" style="font-size:10px;padding:1px 6px">'+(isAI?'🤖 AI':'📝 수동')+'</span></div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px"><div style="font-size:11px;color:var(--muted)">'+(r.ts?new Date(r.ts).toLocaleString('ko-KR'):'-')+'</div>'+delBtn+'</div></div>';
+  }).join('');
+}
+function loadRec(i){var r=_histCache[i];if(!r)return;currentReport=r;renderResult(r);goTab('result');}
+function delRec(i){
+  if(!_adminMode){showToast('❌ 관리자만 삭제할 수 있습니다','err');return;}
+  var r=_histCache[i];if(!r)return;
+  if(r._id)fbDel(r._id).then(function(){showToast('🗑️ 삭제됨');refreshBadge();loadHistory();});
+}
+function clearAll(){
+  if(!_adminMode){showToast('❌ 관리자만 삭제할 수 있습니다','err');return;}
+  if(!confirm('모든 기록을 삭제할까요?'))return;
+  Promise.all(_histCache.map(function(r){return r._id?fbDel(r._id):Promise.resolve();}))
+    .then(function(){refreshBadge();loadHistory();showToast('🗑️ 전체 삭제됨');});
+}
+function refreshBadge(){
+  var el=document.getElementById('histBadge');
+  if(!fbDb){el.style.display='none';return;}
+  fbLoad().then(function(r){var n=r?r.length:0;el.style.display=n>0?'inline':'none';el.textContent=n;}).catch(function(){el.style.display='none';});
 }
 
-async function loadHistory(){
-  if(fbDb){ const r=await fbLoad(); if(r!==null){ renderHist(r,true); return; } }
-  renderHist(JSON.parse(localStorage.getItem('sbar_v2')||'[]'),false);
+/* CSV */
+function exportCSV(){
+  if(!_histCache||!_histCache.length){showToast('내보낼 기록이 없습니다','warn');return;}
+  var h=['저장일시','환자명','나이','성별','병실','진단명','모드','S','B','A','R'];
+  var rows=_histCache.map(function(r){return[r.ts?new Date(r.ts).toLocaleString('ko-KR'):'',r.pName||'',r.pAge||'',r.pGender||'',r.pRoom||'',r.pDx||'',r.mode||'',(r.sbar&&r.sbar.S||'').replace(/\n/g,' '),(r.sbar&&r.sbar.B||'').replace(/\n/g,' '),(r.sbar&&r.sbar.A||'').replace(/\n/g,' '),(r.sbar&&r.sbar.R||'').replace(/\n/g,' ')];});
+  var csv=[h].concat(rows).map(function(row){return row.map(function(c){return'"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='SBAR_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  showToast('📊 CSV 다운로드 완료');
 }
 
-function renderHist(list,isFb){
-  _histCache=list; _histIsFb=isFb;
-  const cont=document.getElementById('histList');
-  if(!list||!list.length){ cont.innerHTML=`<div class="empty"><div class="emo">📂</div><h3>저장된 기록 없음</h3><p>보고서 생성 후 저장 버튼을 클릭하세요</p></div>`; return; }
-  cont.innerHTML=list.map((r,i)=>`
-  <div class="hist-item" onclick="loadRec(${i})">
-    <div class="hist-ico">🏥</div>
-    <div style="flex:1">
-      <div style="font-size:14px;font-weight:600">${r.pName||'환자'} (${r.pAge||'?'}세 ${r.pGender||''})</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:2px">${r.pDx||'진단 없음'}${r.pRoom?` · ${r.pRoom}`:''}
-        <span class="mbadge ${r.mode&&r.mode.includes('Gemini')?'m-ai':'m-ok'}" style="font-size:10px;padding:1px 6px;margin-left:5px">${r.mode&&r.mode.includes('Gemini')?'🤖 AI':'📝 수동'}</span>
-      </div>
-    </div>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
-      <div style="font-size:11px;color:var(--muted)">${r.ts?new Date(r.ts).toLocaleString('ko-KR'):'-'}</div>
-      <button class="btn btn-o btn-xs" onclick="event.stopPropagation();delRec(${i})">🗑️</button>
-    </div>
-  </div>`).join('');
-}
-
-function loadRec(idx){ const r=_histCache[idx]; if(!r) return; currentReport=r; renderResult(r); goTab('result'); }
-async function delRec(idx){
-  const r=_histCache[idx]; if(!r) return;
-  if(_histIsFb&&r._id){ await fbDel(r._id); showToast('🗑️ Firebase에서 삭제됨'); }
-  else { let h=JSON.parse(localStorage.getItem('sbar_v2')||'[]'); h.splice(idx,1); localStorage.setItem('sbar_v2',JSON.stringify(h)); showToast('🗑️ 삭제됨'); }
-  refreshBadge(); loadHistory();
-}
-async function clearAll(){
-  if(!confirm('모든 기록을 삭제할까요?')) return;
-  if(_histIsFb&&fbDb){ for(const r of _histCache) if(r._id) await fbDel(r._id); }
-  else localStorage.removeItem('sbar_v2');
-  refreshBadge(); loadHistory(); showToast('🗑️ 전체 삭제됨');
-}
-async function refreshBadge(){
-  const el=document.getElementById('histBadge');
-  try{ if(fbDb){ const r=await fbLoad(); const n=r?.length||0; el.style.display=n>0?'inline':'none'; el.textContent=n; return; } }catch(e){}
-  const h=JSON.parse(localStorage.getItem('sbar_v2')||'[]');
-  el.style.display=h.length>0?'inline':'none'; el.textContent=h.length;
-}
-
-/* ─── CHATBOT ─── */
+/* CHATBOT */
 function toggleChat(){
   chatIsOpen=!chatIsOpen;
   document.getElementById('chatbot').classList.toggle('open',chatIsOpen);
   document.getElementById('fabIcon').textContent=chatIsOpen?'✕':'💬';
-  if(chatIsOpen) updateChatNoKey();
+  if(chatIsOpen){var k=getKey();document.getElementById('chatNoKey').style.display=(!k||!k.startsWith('AIza'))?'block':'none';}
 }
-function qAsk(q){ document.getElementById('chatIn').value=q; sendChat(); }
-
-async function sendChat(){
-  const inp=document.getElementById('chatIn');
-  const q=inp.value.trim(); if(!q) return;
-  inp.value='';
-  addMsg('user',q);
-  document.getElementById('qWrap').style.display='none';
+function qAsk(q){document.getElementById('chatIn').value=q;sendChat();}
+function sendChat(){
+  var inp=document.getElementById('chatIn');var q=inp.value.trim();if(!q)return;
+  inp.value='';addMsg('user',q);document.getElementById('qWrap').style.display='none';
   chatHistory.push({role:'user',parts:[{text:q}]});
-  const key=getCfg().gKey||'';
-  if(!key||!key.startsWith('AIza')){
-    addMsg('bot','Gemini API 키가 설정되지 않았습니다. 상단 ⚙️ 버튼에서 키를 입력해 주세요.\n\nSBAR은 Situation·Background·Assessment·Recommendation의 약자로 의료진 간 표준화된 커뮤니케이션 프레임워크입니다.');
-    return;
-  }
+  var key=getKey();
+  if(!key||!key.startsWith('AIza')){addMsg('bot','Gemini API 키가 없습니다. ⚙️ Gemini 설정에서 키를 입력하세요.\n\nSBAR은 Situation·Background·Assessment·Recommendation의 약자로 의료진 간 표준 커뮤니케이션 프레임워크입니다.');return;}
   setTyping(true);
-  try{
-    const sys='당신은 한국 간호교육 전문가로 SBAR 보고 양식, 임상 간호, 환자 안전, 활력징후 해석에 대해 교육합니다. 한국어로 명확하고 임상적으로 정확하게 답변하세요.';
-    const msgs=[{role:'user',parts:[{text:sys}]},{role:'model',parts:[{text:'네, 도와드리겠습니다.'}]},...chatHistory.slice(-10)];
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${key}`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:msgs,generationConfig:{temperature:0.6,maxOutputTokens:700,thinkingConfig:{thinkingBudget:0}}})
-    });
-    const data=await res.json();
-    const reply=data.candidates?.[0]?.content?.parts?.[0]?.text||'답변을 생성하지 못했습니다.';
-    chatHistory.push({role:'model',parts:[{text:reply}]});
-    setTyping(false); addMsg('bot',reply);
-  }catch(e){ setTyping(false); addMsg('bot','오류: '+e.message); }
+  var sys='당신은 한국 간호교육 전문가로 SBAR, 임상 간호, 환자 안전, 활력징후 해석을 가르칩니다. 한국어로 명확하고 임상적으로 정확하게 답변하세요.';
+  var msgs=[{role:'user',parts:[{text:sys}]},{role:'model',parts:[{text:'네, 도와드리겠습니다.'}]}].concat(chatHistory.slice(-10));
+  fetch('https://generativelanguage.googleapis.com/v1beta/models/'+MODEL+':generateContent?key='+key,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:msgs,generationConfig:{temperature:0.6,maxOutputTokens:700,thinkingConfig:{thinkingBudget:0}}})
+  }).then(function(r){return r.json();}).then(function(data){
+    var reply=data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts[0]?data.candidates[0].content.parts[0].text:'답변 생성 실패';
+    chatHistory.push({role:'model',parts:[{text:reply}]});setTyping(false);addMsg('bot',reply);
+  }).catch(function(e){setTyping(false);addMsg('bot','오류: '+e.message);});
 }
-
 function addMsg(role,text){
-  const cont=document.getElementById('chatMsgs');
-  const d=document.createElement('div');
-  d.className='msg '+role;
-  d.innerHTML=`<div class="mav">${role==='bot'?'🤖':'👤'}</div><div class="bubble">${text.replace(/\n/g,'<br>')}</div>`;
-  cont.appendChild(d); cont.scrollTop=cont.scrollHeight;
+  var cont=document.getElementById('chatMsgs'),d=document.createElement('div');
+  d.className='msg '+role;d.innerHTML='<div class="mav">'+(role==='bot'?'🤖':'👤')+'</div><div class="bubble">'+text.replace(/\n/g,'<br>')+'</div>';
+  cont.appendChild(d);cont.scrollTop=cont.scrollHeight;
 }
-function setTyping(on){ document.getElementById('typingRow').style.display=on?'flex':'none'; if(on) document.getElementById('chatMsgs').scrollTop=9999; }
-
-/* ─── LOADING ─── */
-function setLoading(on,msg){ document.getElementById('ldOv').classList.toggle('on',on); if(msg) document.getElementById('ldMsg').textContent=msg; }
-
-/* ─── TOAST ─── */
-let _tt;
-function showToast(msg,type='info'){
-  const el=document.getElementById('toast');
-  el.textContent=msg;
-  el.style.background=type==='err'?'#b91c1c':type==='warn'?'#92400e':'#0f2a3c';
-  el.classList.add('show');
-  clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove('show'),3500);
+function setTyping(on){document.getElementById('typingRow').style.display=on?'flex':'none';if(on)document.getElementById('chatMsgs').scrollTop=9999;}
+function setLoading(on,msg,sub){document.getElementById('ldOv').classList.toggle('on',on);if(msg)document.getElementById('ldMsg').textContent=msg;if(sub)document.getElementById('ldSub').textContent=sub;}
+var _tt;
+function showToast(msg,type){
+  type=type||'info';var el=document.getElementById('toast');
+  el.textContent=msg;el.style.background=type==='err'?'#7f1d1d':type==='warn'?'#78350f':'#0D2E1C';
+  el.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){el.classList.remove('show');},3600);
 }
-const toast=showToast;
 </script>
 </body>
 </html>
