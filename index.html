@@ -239,9 +239,12 @@ textarea{resize:vertical;min-height:68px;line-height:1.65;}
         </div>
         <p style="font-size:11px;color:var(--muted)">🔗 <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--pri)">Google AI Studio</a> 무료 발급 · AI 데이터 입력, SBAR 생성, AI 채점, 챗봇에 사용</p>
       </div>
-      <div style="background:#f0fdf4;border:1px solid var(--vnbr);border-radius:10px;padding:12px 14px;">
-        <p style="font-size:12px;font-weight:700;color:var(--vn);margin-bottom:4px">🔥 Firebase 자동 연결됨</p>
-        <p style="font-size:11px;color:var(--muted)">프로젝트 <strong>test-f9ug</strong>에 자동 연결됩니다. 별도 설정 불필요.</p>
+      <div class="m-sec" style="margin-top:18px">
+        <h4>🔥 Firebase API Key &nbsp;<span id="fbKeyBadge" class="mbadge m-off">미설정</span></h4>
+        <div class="fld"><label>Firebase API Key (Firestore 저장용)</label>
+          <div style="display:flex;gap:6px"><input type="password" id="fbKeyInput" placeholder="AIzaSy..." style="flex:1" oninput="onFbKeyInput()"><button class="btn btn-o btn-sm" onclick="tgFbVis()">👁️</button></div>
+        </div>
+        <p style="font-size:11px;color:var(--muted)">Firebase Console → 프로젝트 설정 → 웹앱 → <strong>apiKey</strong> 값</p>
       </div>
     </div>
     <div class="modal-ft"><button class="btn btn-p btn-sm" onclick="saveCfg()">💾 저장</button></div>
@@ -401,7 +404,7 @@ textarea{resize:vertical;min-height:68px;line-height:1.65;}
 <script>
 /* ── FIREBASE CONFIG ── */
 const FB_CFG={
-  apiKey:'',  /* UI에서 입력 */
+  get apiKey(){return localStorage.getItem('sbar_fbkey')||'';},
   projectId:'test-f9ug',
   appId:'1:853330608980:web:4c2a098c646d8740e0bec1',
   authDomain:'test-f9ug.firebaseapp.com'
@@ -417,7 +420,9 @@ let _histCache=[],audioCtx=null;
   document.getElementById('rTime').value=new Date().toISOString().slice(0,16);
   document.getElementById('pAdm').value=new Date().toISOString().slice(0,10);
   var k=localStorage.getItem('sbar_gkey')||'';
+  var fk=localStorage.getItem('sbar_fbkey')||'';
   if(k){document.getElementById('gKey').value=k;updateGBadge(k);}
+  if(fk){document.getElementById('fbKeyInput').value=fk;onFbKeyInput();}
   updateHdrBadge(k);updateChatNoKey(k);
   waitFb();
   applyAdminUI();
@@ -430,13 +435,29 @@ function waitFb(t){
   else if(t<30)setTimeout(function(){waitFb(t+1);},300);
 }
 function initFb(){
+  var fk=localStorage.getItem('sbar_fbkey')||'';
+  if(!fk||!fk.startsWith('AIza')){
+    showToast('⚠️ Firebase API Key를 설정해 주세요 → ⚙️ 버튼','warn');
+    document.getElementById('histList').innerHTML='<div class="empty"><div class="emo">🔑</div><h3>Firebase API Key 필요</h3><p>⚙️ Gemini 설정 버튼에서 Firebase API Key를 입력하세요</p></div>';
+    return;
+  }
   try{
     var m=window._fb;
     var ex=m.getApps().find(function(a){return a.name==='sbar';});
     fbApp=ex||m.initializeApp(FB_CFG,'sbar');
     fbDb=m.getFirestore(fbApp);
-    refreshBadge();
-    showToast('🔥 Firebase 연결됨 (test-f9ug)');
+    showToast('🔥 Firebase 연결됨');
+    /* 기록 미리 로드 (탭 전환 시 즉시 표시) */
+    fbLoad().then(function(recs){
+      if(recs){
+        _histCache=recs;
+        var n=recs.length;
+        var el=document.getElementById('histBadge');
+        el.style.display=n>0?'inline':'none';el.textContent=n;
+        /* 기록 탭이 열려 있으면 바로 렌더 */
+        if(document.getElementById('tab-history').style.display!=='none')renderHist(recs);
+      }
+    });
   }catch(e){console.error('FB:',e);showToast('⚠️ Firebase 오류: '+e.message,'warn');}
 }
 function fbSave(r){
@@ -542,11 +563,24 @@ function openModal(){document.getElementById('settingsModal').classList.add('on'
 function closeModal(){document.getElementById('settingsModal').classList.remove('on');}
 function onGInput(){updateGBadge(document.getElementById('gKey').value);}
 function tgVis(){gVisible=!gVisible;document.getElementById('gKey').type=gVisible?'text':'password';}
+var _fbKeyVis=false;
+function onFbKeyInput(){
+  var k=document.getElementById('fbKeyInput').value.trim();
+  var el=document.getElementById('fbKeyBadge');
+  if(k&&k.startsWith('AIza')){el.className='mbadge m-ok';el.textContent='🟢 입력됨';}
+  else if(k){el.className='mbadge m-off';el.textContent='❌ 형식 오류';}
+  else{el.className='mbadge m-off';el.textContent='미설정';}
+}
+function tgFbVis(){_fbKeyVis=!_fbKeyVis;document.getElementById('fbKeyInput').type=_fbKeyVis?'text':'password';}
 function saveCfg(){
   var k=document.getElementById('gKey').value.trim();
+  var fk=document.getElementById('fbKeyInput').value.trim();
   localStorage.setItem('sbar_gkey',k);
+  if(fk) localStorage.setItem('sbar_fbkey',fk);
   updateGBadge(k);updateHdrBadge(k);updateChatNoKey(k);
-  closeModal();showToast('💾 Gemini API 키 저장됨');
+  closeModal();showToast('💾 설정 저장됨');
+  /* Firebase 재연결 */
+  if(fk&&fk.startsWith('AIza')){fbApp=null;fbDb=null;waitFb();}
 }
 function updateGBadge(k){
   var el=document.getElementById('gBadge');
@@ -787,10 +821,19 @@ function saveRecord(){
   });
 }
 function loadHistory(){
-  if(!fbDb){document.getElementById('histList').innerHTML='<div class="empty"><div class="emo">⏳</div><h3>Firebase 연결 중…</h3><p>잠시 후 새로고침 해주세요</p></div>';return;}
+  if(!fbDb){
+    var fk=localStorage.getItem('sbar_fbkey')||'';
+    var msg=fk?'<div class="empty"><div class="emo">⏳</div><h3>Firebase 연결 중…</h3><p>잠시 기다려 주세요</p></div>':'<div class="empty"><div class="emo">🔑</div><h3>Firebase API Key 필요</h3><p>⚙️ 버튼에서 Firebase API Key를 입력하세요</p></div>';
+    document.getElementById('histList').innerHTML=msg;
+    return;
+  }
+  /* 캐시가 있으면 즉시 표시 */
+  if(_histCache.length>0)renderHist(_histCache);
+  else document.getElementById('histList').innerHTML='<div class="empty"><div class="emo">🔄</div><h3>기록을 불러오는 중…</h3></div>';
+  /* 최신 데이터 갱신 */
   fbLoad().then(function(recs){
     if(recs)renderHist(recs);
-    else document.getElementById('histList').innerHTML='<div class="empty"><div class="emo">⚠️</div><h3>불러오기 실패</h3><p>Firestore 보안 규칙을 확인하세요</p></div>';
+    else if(_histCache.length===0)document.getElementById('histList').innerHTML='<div class="empty"><div class="emo">⚠️</div><h3>불러오기 실패</h3><p>Firestore 보안 규칙(읽기 허용)을 확인하세요</p></div>';
   });
 }
 function renderHist(list){
