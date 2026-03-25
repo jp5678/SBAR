@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 기반 SBAR 자동 생성기 | 청암대학교 간호학과</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script type="module">
+import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+window._fb = { initializeApp, getApps, getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, limit };
+window._fbReady = true;
+</script>
+<style>
+/* ═══════════════════════════════════════
+   ROOT
+═══════════════════════════════════════ */
+:root{
+  --pri:#0B4F6C; --pri-mid:#1268A1; --pri-lt:#1a7fa6;
+  --acc:#10B981; --acc-lt:#34D399;
+  --bg:#EAF1F7; --card:#fff; --txt:#1a2332; --muted:#607080; --bdr:#ccd9e3;
+  /* SBAR section colors */
+  --sc:#2563EB; --sbg:#EFF6FF; --sbr:#bfdbfe;
+  --bc:#7C3AED; --bbg:#F5F3FF; --bbr:#ddd6fe;
+  --ac:#D97706; --abg:#FFFBEB; --abr:#fde68a;
+  --rc:#059669; --rbg:#ECFDF5; --rbr:#a7f3d0;
+  /* Vital status colors */
+  --v-normal:#16a34a; --v-normal-bg:#f0fdf4; --v-normal-br:#86efac;
+  --v-warn:#d97706;   --v-warn-bg:#fffbeb;   --v-warn-br:#fcd34d;
+  --v-crit:#dc2626;   --v-crit-bg:#fff1f2;   --v-crit-br:#fca5a5;
+  --sh:0 2px 12px rgba(11,79,108,.1); --rad:14px; --rad-sm:9px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;-webkit-font-smoothing:antialiased;}
+
+/* ─── HEADER ─── */
+.hdr{
+  background:linear-gradient(135deg,#071e2e 0%,var(--pri) 40%,var(--pri-mid) 100%);
+  color:#fff;padding:0 26px;height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 4px 24px rgba(7,30,46,.4);position:sticky;top:0;z-index:100;
+}
+.hdr-l{display:flex;align-items:center;gap:11px;}
+.hdr-logo{width:40px;height:40px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.hdr-title{font-size:17px;font-weight:800;letter-spacing:-.4px;}
+.hdr-sub{font-size:10px;opacity:.6;margin-top:2px;}
+.hdr-r{display:flex;align-items:center;gap:9px;}
+.hdr-badge{border-radius:20px;padding:5px 12px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px;white-space:nowrap;}
+.hbadge-ok{background:rgba(16,185,129,.2);border:1px solid rgba(16,185,129,.4);color:#a7f3d0;}
+.hbadge-off{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);}
+.hdr-btn{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);border-radius:8px;color:#fff;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;gap:5px;transition:background .2s;}
+.hdr-btn:hover{background:rgba(255,255,255,.24);}
+
+/* ─── LAYOUT ─── */
+.wrap{max-width:1100px;margin:0 auto;padding:20px 14px 110px;}
+.tabs{display:flex;gap:3px;background:rgba(11,79,108,.08);padding:4px;border-radius:12px;width:fit-content;margin-bottom:18px;}
+.tab-btn{padding:8px 18px;border:none;background:transparent;border-radius:8px;font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;white-space:nowrap;}
+.tab-btn.active{background:var(--pri);color:#fff;box-shadow:0 2px 8px rgba(11,79,108,.3);}
+.tab-btn:not(.active):hover{background:rgba(11,79,108,.1);color:var(--pri);}
+.nbadge{background:var(--acc);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;}
+
+/* ─── CARD ─── */
+.card{background:var(--card);border-radius:var(--rad);padding:18px;box-shadow:var(--sh);margin-bottom:12px;border:1px solid var(--bdr);}
+.chdr{display:flex;align-items:center;gap:9px;margin-bottom:14px;padding-bottom:11px;border-bottom:2px solid var(--bg);}
+.cico{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.chdr h3{font-size:13.5px;font-weight:700;color:var(--pri);}
+.chdr p{font-size:11px;color:var(--muted);margin-top:1px;}
+
+/* ─── FORM BASE ─── */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.full{grid-column:1/-1;}
+.fgrp{display:flex;flex-direction:column;gap:3px;}
+label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+input,textarea,select{font-family:'Noto Sans KR',sans-serif;font-size:13px;border:1.5px solid var(--bdr);border-radius:var(--rad-sm);padding:8px 10px;color:var(--txt);background:#fff;transition:border-color .18s,box-shadow .18s,background .18s;outline:none;}
+input:focus,textarea:focus,select:focus{border-color:var(--pri-lt);box-shadow:0 0 0 3px rgba(26,127,166,.12);}
+textarea{resize:vertical;min-height:70px;line-height:1.65;}
+.sec-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.sec-lbl::after{content:'';flex:1;height:1px;background:var(--bdr);}
+
+/* ─── VITAL SIGNS PANEL ─── */
+.vital-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px;}
+.vbox{
+  border-radius:12px;border:2px solid var(--bdr);
+  background:#fafcff;
+  padding:11px 8px 8px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  position:relative;
+  transition:border-color .25s,background .25s,box-shadow .25s;
+}
+.vbox.v-normal{border-color:var(--v-normal-br);background:var(--v-normal-bg);}
+.vbox.v-warn  {border-color:var(--v-warn-br);background:var(--v-warn-bg);}
+.vbox.v-crit  {border-color:var(--v-crit-br);background:var(--v-crit-bg);box-shadow:0 0 12px rgba(220,38,38,.2);animation:critPulse 1.4s ease-in-out infinite;}
+@keyframes critPulse{
+  0%,100%{box-shadow:0 0 6px rgba(220,38,38,.2);}
+  50%    {box-shadow:0 0 20px rgba(220,38,38,.55);}
+}
+.vbox-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.vbox input{
+  width:100%;font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:700;
+  text-align:center;border:none;background:transparent;padding:4px 2px;color:var(--txt);
+  outline:none;
+}
+.vbox.v-warn input{color:var(--v-warn);}
+.vbox.v-crit input{color:var(--v-crit);}
+.vbox-unit{font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+/* STATUS BADGE */
+.vstatus{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:2px 8px;border-radius:20px;
+  font-size:10px;font-weight:800;letter-spacing:.4px;
+  margin-top:2px;transition:all .25s;
+}
+.vs-none  {background:#F3F4F6;color:#9CA3AF;border:1.5px solid #e5e7eb;}
+.vs-normal{background:var(--v-normal-bg);color:var(--v-normal);border:1.5px solid var(--v-normal-br);}
+.vs-warn  {background:var(--v-warn-bg);color:var(--v-warn);border:1.5px solid var(--v-warn-br);}
+.vs-crit  {background:var(--v-crit-bg);color:var(--v-crit);border:1.5px solid var(--v-crit-br);animation:badgeBlink 1s step-start infinite;}
+@keyframes badgeBlink{0%,100%{opacity:1;}50%{opacity:.2;}}
+
+/* BP special: two-part input */
+.bp-row{display:flex;align-items:center;gap:2px;width:100%;}
+.bp-row input{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:700;text-align:center;border:none;background:transparent;padding:4px 0;color:var(--txt);outline:none;flex:1;min-width:0;}
+.vbox.v-warn .bp-row input{color:var(--v-warn);}
+.vbox.v-crit .bp-row input{color:var(--v-crit);}
+.bp-sep{font-size:16px;font-weight:700;color:var(--muted);flex-shrink:0;}
+
+/* VITAL SUMMARY BAR */
+.vital-summary{
+  background:linear-gradient(90deg,#0f2a3c,#1268A1);
+  border-radius:10px;padding:9px 16px;margin-top:6px;
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.vital-summary .vs-label{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);margin-right:4px;}
+.vital-summary .vs-item{display:flex;align-items:center;gap:5px;font-size:12px;color:#fff;}
+.vital-summary .vs-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.vs-dot-ok{background:#4ade80;}
+.vs-dot-warn{background:#fbbf24;}
+.vs-dot-crit{background:#f87171;animation:dotBlink 1s step-start infinite;}
+@keyframes dotBlink{0%,100%{opacity:1;}50%{opacity:0;}}
+
+/* GCS INPUT */
+.gcs-row{margin-top:10px;}
+
+/* ─── BUTTONS ─── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border:none;border-radius:var(--rad-sm);font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.btn-p{background:linear-gradient(135deg,var(--pri),var(--pri-lt));color:#fff;box-shadow:0 3px 10px rgba(11,79,108,.28);}
+.btn-p:hover{transform:translateY(-1px);}
+.btn-g{background:linear-gradient(135deg,var(--acc),var(--acc-lt));color:#fff;}
+.btn-g:hover{transform:translateY(-1px);}
+.btn-o{background:#fff;border:1.5px solid var(--bdr);color:var(--txt);}
+.btn-o:hover{border-color:var(--pri);color:var(--pri);background:#f0f7fb;}
+.btn-sm{padding:5px 12px;font-size:12px;}
+.btn-xs{padding:4px 9px;font-size:11px;}
+.demo-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(16,185,129,.1);border:1.5px solid rgba(16,185,129,.3);border-radius:8px;font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:600;color:var(--acc);cursor:pointer;margin-bottom:14px;transition:all .2s;}
+.demo-btn:hover{background:rgba(16,185,129,.2);}
+
+/* GEN CTA */
+.gen-cta{text-align:center;padding:8px 0 4px;}
+.main-btn{padding:14px 44px;font-size:15px;border-radius:12px;
+  background:linear-gradient(90deg,#071e2e 0%,#0B4F6C 35%,#1268A1 65%,#10B981 100%);
+  background-size:250% auto;color:#fff;border:none;cursor:pointer;
+  font-family:'Noto Sans KR',sans-serif;font-weight:800;
+  box-shadow:0 6px 24px rgba(11,79,108,.35);
+  display:inline-flex;align-items:center;gap:9px;
+  animation:gradMove 6s linear infinite;}
+@keyframes gradMove{0%{background-position:0%}100%{background-position:250%}}
+.main-btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(11,79,108,.45);}
+
+/* ─── SBAR RESULT ─── */
+.pt-banner{background:linear-gradient(135deg,#071e2e 0%,var(--pri) 55%,var(--pri-mid) 100%);color:#fff;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:13px;margin-bottom:11px;}
+.pt-name{font-size:16px;font-weight:700;}
+.pt-detail{font-size:11px;opacity:.75;margin-top:3px;}
+.pt-meta{margin-left:auto;text-align:right;font-size:11px;opacity:.7;line-height:1.9;}
+.act-bar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:11px;padding:10px 13px;background:var(--card);border-radius:var(--rad-sm);border:1px solid var(--bdr);box-shadow:var(--sh);}
+.sbar-sec{border-radius:12px;overflow:hidden;box-shadow:var(--sh);border:1px solid transparent;margin-bottom:10px;animation:fadeUp .35s ease forwards;opacity:0;transform:translateY(10px);}
+.sbar-sec:nth-child(1){animation-delay:.04s}.sbar-sec:nth-child(2){animation-delay:.10s}.sbar-sec:nth-child(3){animation-delay:.16s}.sbar-sec:nth-child(4){animation-delay:.22s}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
+.ss{background:var(--sbg);border-color:var(--sbr);}.sb{background:var(--bbg);border-color:var(--bbr);}.sa{background:var(--abg);border-color:var(--abr);}.sr{background:var(--rbg);border-color:var(--rbr);}
+.sbar-hd{padding:11px 16px;display:flex;align-items:center;gap:11px;}
+.ss .sbar-hd{background:var(--sc);}.sb .sbar-hd{background:var(--bc);}.sa .sbar-hd{background:var(--ac);}.sr .sbar-hd{background:var(--rc);}
+.skey{width:34px;height:34px;background:rgba(255,255,255,.22);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:700;color:#fff;flex-shrink:0;}
+.sht h4{font-size:13px;font-weight:700;color:#fff;}.sht p{font-size:11px;color:rgba(255,255,255,.75);margin-top:1px;}
+.sbar-body{padding:14px 17px;font-size:13px;line-height:1.85;color:var(--txt);white-space:pre-wrap;min-height:52px;}
+.sbar-body[contenteditable="true"]{outline:none;border:1.5px dashed rgba(11,79,108,.3);border-radius:6px;background:rgba(255,255,255,.6);}
+.edit-ind{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;background:#FFF8E7;border:1.5px solid #FBBF24;border-radius:6px;font-size:11px;font-weight:600;color:#92400e;margin-bottom:7px;}
+
+/* MBADGE */
+.mbadge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+.m-ai{background:#EFF6FF;color:#1d4ed8;border:1.5px solid #bfdbfe;}
+.m-ok{background:#ECFDF5;color:#065f46;border:1.5px solid #a7f3d0;}
+.m-off{background:#F3F4F6;color:#6b7280;border:1.5px solid #d1d5db;}
+.m-err{background:#FEF2F2;color:#dc2626;border:1.5px solid #fca5a5;}
+
+/* HISTORY */
+.hist-item{background:#fff;border-radius:10px;padding:11px 14px;border:1px solid var(--bdr);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:11px;margin-bottom:8px;box-shadow:var(--sh);}
+.hist-item:hover{border-color:var(--pri-lt);transform:translateX(3px);}
+.hist-ico{width:34px;height:34px;background:linear-gradient(135deg,var(--pri),var(--pri-lt));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.empty{text-align:center;padding:48px 20px;color:var(--muted);}
+.empty .emo{font-size:40px;margin-bottom:9px;}
+
+/* LOADING */
+.ld-ov{display:none;position:fixed;inset:0;background:rgba(7,30,46,.6);backdrop-filter:blur(6px);z-index:998;justify-content:center;align-items:center;flex-direction:column;gap:16px;}
+.ld-ov.on{display:flex;}
+.spinner{width:48px;height:48px;border:4px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ld-msg{color:#fff;font-size:14px;font-weight:600;}
+.ld-sub{color:rgba(255,255,255,.6);font-size:12px;}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(70px);background:#0f2a3c;color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;box-shadow:0 6px 22px rgba(0,0,0,.25);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);z-index:9999;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+
+/* SETTINGS MODAL */
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px);z-index:9000;justify-content:center;align-items:center;padding:14px;}
+.modal-ov.on{display:flex;}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:560px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.28);}
+.modal-hdr{padding:16px 20px 13px;border-bottom:1.5px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;}
+.modal-hdr h3{font-size:15px;font-weight:700;color:var(--pri);}
+.mc-btn{background:none;border:none;font-size:19px;cursor:pointer;color:var(--muted);}
+.modal-body{padding:18px 20px;}
+.m-sec{margin-bottom:20px;}
+.m-sec h4{font-size:13px;font-weight:700;color:var(--pri);margin-bottom:11px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.modal-ft{padding:13px 20px;border-top:1.5px solid var(--bdr);display:flex;gap:8px;justify-content:flex-end;}
+.fld{display:flex;flex-direction:column;gap:3px;margin-bottom:9px;}
+.fld label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.fld input{font-family:'IBM Plex Mono',monospace;font-size:12px;}
+.fb-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+
+/* CHATBOT */
+.chat-fab{position:fixed;bottom:22px;right:22px;width:54px;height:54px;background:linear-gradient(135deg,var(--pri),var(--pri-mid));border-radius:50%;border:none;cursor:pointer;box-shadow:0 6px 22px rgba(11,79,108,.45);display:flex;align-items:center;justify-content:center;font-size:22px;transition:all .25s cubic-bezier(.34,1.56,.64,1);z-index:800;}
+.chat-fab:hover{transform:scale(1.12);}
+.chatbot{position:fixed;bottom:88px;right:22px;width:350px;max-height:520px;background:#fff;border-radius:18px;box-shadow:0 12px 50px rgba(11,79,108,.25);border:1px solid var(--bdr);display:flex;flex-direction:column;z-index:800;transform:scale(.85) translateY(28px);opacity:0;pointer-events:none;transition:all .25s cubic-bezier(.34,1.56,.64,1);transform-origin:bottom right;}
+.chatbot.open{transform:scale(1) translateY(0);opacity:1;pointer-events:all;}
+.chat-hdr{background:linear-gradient(135deg,#071e2e 0%,var(--pri) 55%,var(--pri-mid) 100%);border-radius:18px 18px 0 0;padding:12px 15px;display:flex;align-items:center;gap:9px;color:#fff;}
+.chat-av{width:32px;height:32px;background:rgba(255,255,255,.18);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.chat-info strong{font-size:13px;font-weight:700;}.chat-info span{display:block;font-size:10px;opacity:.7;margin-top:1px;}
+.chat-x{margin-left:auto;background:rgba(255,255,255,.15);border:none;color:#fff;width:25px;height:25px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;}
+.chat-x:hover{background:rgba(255,255,255,.28);}
+.chat-msgs{flex:1;overflow-y:auto;padding:12px 12px 6px;display:flex;flex-direction:column;gap:9px;max-height:310px;}
+.chat-msgs::-webkit-scrollbar{width:3px;}.chat-msgs::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px;}
+.msg{display:flex;gap:7px;align-items:flex-end;}.msg.user{flex-direction:row-reverse;}
+.bubble{max-width:82%;padding:8px 12px;border-radius:14px;font-size:12.5px;line-height:1.6;}
+.msg.bot .bubble{background:var(--bg);border-bottom-left-radius:4px;color:var(--txt);}
+.msg.user .bubble{background:linear-gradient(135deg,var(--pri),var(--pri-lt));color:#fff;border-bottom-right-radius:4px;}
+.mav{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;}
+.msg.bot .mav{background:var(--bg);border:1px solid var(--bdr);}
+.typing{display:flex;gap:4px;padding:8px 12px;align-items:center;}
+.typing span{width:6px;height:6px;background:var(--bdr);border-radius:50%;animation:bounce .9s ease-in-out infinite;}
+.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+.qwrap{padding:0 10px 7px;display:flex;gap:5px;flex-wrap:wrap;}
+.qbtn{padding:4px 10px;background:var(--bg);border:1px solid var(--bdr);border-radius:20px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .18s;font-family:'Noto Sans KR',sans-serif;white-space:nowrap;}
+.qbtn:hover{border-color:var(--pri);color:var(--pri);background:#f0f7fb;}
+.chat-nokey{padding:9px 12px;font-size:11px;color:#d97706;background:#fffbeb;border-top:1px solid #fde68a;text-align:center;display:none;}
+.chat-inp{padding:9px 10px;border-top:1px solid var(--bdr);display:flex;gap:6px;}
+.chat-inp input{flex:1;border:1.5px solid var(--bdr);border-radius:9px;padding:7px 11px;font-family:'Noto Sans KR',sans-serif;font-size:13px;outline:none;}
+.chat-inp input:focus{border-color:var(--pri-lt);}
+.send-btn{width:34px;height:34px;background:var(--pri);border:none;border-radius:8px;cursor:pointer;color:#fff;font-size:15px;display:flex;align-items:center;justify-content:center;}
+.send-btn:hover{background:var(--pri-lt);}
+
+/* ─── VITAL LEGEND ─── */
+.v-legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px;align-items:center;}
+.v-leg-item{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;}
+.v-leg-dot{width:10px;height:10px;border-radius:50%;}
+.vld-n{background:var(--v-normal);}
+.vld-w{background:var(--v-warn);}
+.vld-c{background:var(--v-crit);}
+
+/* SOUND TOGGLE */
+.sound-toggle{display:flex;align-items:center;gap:7px;padding:6px 12px;background:rgba(11,79,108,.06);border-radius:8px;border:1px solid var(--bdr);cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);transition:all .2s;margin-left:auto;}
+.sound-toggle.muted-state{color:var(--v-crit);border-color:var(--v-crit-br);background:var(--v-crit-bg);}
+.sound-toggle:hover{border-color:var(--pri);}
+
+@media print{.no-print{display:none!important;}.sbar-sec{break-inside:avoid;animation:none!important;opacity:1!important;transform:none!important;}body{background:#fff;}.hdr{position:relative;}.chat-fab,.chatbot{display:none!important;}}
+@media(max-width:768px){.fg{grid-template-columns:1fr;}.vital-grid{grid-template-columns:repeat(3,1fr);}.hdr{padding:0 11px;}.chatbot{width:calc(100vw - 26px);right:13px;}.wrap{padding:14px 10px 110px;}}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="ld-ov" id="ldOv">
+  <div class="spinner"></div>
+  <div class="ld-msg" id="ldMsg">Gemini 2.5 Flash AI가 보고서를 작성 중…</div>
+  <div class="ld-sub">임상 간호사 관점에서 분석 중</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- HEADER -->
+<header class="hdr no-print">
+  <div class="hdr-l">
+    <div class="hdr-logo">🏥</div>
+    <div>
+      <div class="hdr-title">AI 기반 SBAR 자동 생성기</div>
+      <div class="hdr-sub">청암대학교 간호학과 · AI융합 간호정보학 · Gemini 2.5 Flash</div>
+    </div>
+  </div>
+  <div class="hdr-r">
+    <div class="hdr-badge hbadge-off" id="hdrBadge">⚙️ 설정 필요</div>
+    <button class="hdr-btn no-print" onclick="openModal()">⚙️ API 설정</button>
+  </div>
+</header>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-ov" id="settingsModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3>⚙️ API / Firebase 설정</h3>
+      <button class="mc-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="m-sec">
+        <h4>🤖 Gemini API (gemini-2.5-flash) &nbsp;<span id="gBadge" class="mbadge m-off">미설정</span></h4>
+        <div class="fld">
+          <label>API 키</label>
+          <div style="display:flex;gap:6px">
+            <input type="password" id="gKey" placeholder="AIzaSy..." style="flex:1" oninput="onGInput()">
+            <button class="btn btn-o btn-sm" onclick="tgVis()">👁️</button>
+          </div>
+        </div>
+        <p style="font-size:11px;color:var(--muted)">🔗 <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--pri)">Google AI Studio</a>에서 무료 발급</p>
+      </div>
+      <div class="m-sec">
+        <h4>🔥 Firebase Firestore &nbsp;<span id="fbBadge" class="mbadge m-off">미설정</span></h4>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:10px">미설정 시 로컬 저장(localStorage) 사용</p>
+        <div class="fb-grid">
+          <div class="fld"><label>API Key</label><input type="text" id="fbKey" placeholder="AIzaSy..."></div>
+          <div class="fld"><label>Project ID</label><input type="text" id="fbPid" placeholder="my-project-id"></div>
+          <div class="fld"><label>App ID</label><input type="text" id="fbAid" placeholder="1:123:web:abc"></div>
+          <div class="fld"><label>Auth Domain (선택)</label><input type="text" id="fbAdom" placeholder="project.firebaseapp.com"></div>
+        </div>
+        <p style="font-size:11px;color:var(--muted);margin-top:4px">🔗 <a href="https://console.firebase.google.com/" target="_blank" style="color:var(--pri)">Firebase Console</a> → 프로젝트 설정 → 웹앱 SDK</p>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-o btn-sm" onclick="clearCfg()">🗑️ 초기화</button>
+      <button class="btn btn-p btn-sm" onclick="saveCfg()">💾 저장 및 적용</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="wrap">
+  <div class="tabs no-print">
+    <button class="tab-btn active" onclick="goTab('input')">✏️ SBAR 작성</button>
+    <button class="tab-btn" onclick="goTab('result')">📋 보고서</button>
+    <button class="tab-btn" onclick="goTab('history')">📁 기록<span class="nbadge" id="histBadge" style="display:none">0</span></button>
+  </div>
+
+  <!-- ═══ INPUT TAB ═══ -->
+  <div id="tab-input">
+    <button class="demo-btn no-print" onclick="fillDemo()">🎯 데모 데이터 자동 입력 (폐렴 케이스)</button>
+
+    <!-- 기본정보 -->
+    <div class="card">
+      <div class="chdr"><div class="cico" style="background:#EFF6FF">👤</div><div><h3>환자 기본 정보</h3><p>Patient Identification</p></div></div>
+      <div class="fg">
+        <div class="fgrp"><label>환자명 (이니셜)</label><input type="text" id="pName" placeholder="예: 홍○○"></div>
+        <div class="fgrp"><label>나이 / 성별</label><div style="display:flex;gap:6px"><input type="number" id="pAge" placeholder="나이" style="width:64px"><select id="pGen" style="flex:1"><option value="">성별</option><option>여성</option><option>남성</option></select></div></div>
+        <div class="fgrp"><label>병실 / 병상</label><input type="text" id="pRoom" placeholder="예: 305호 2번 병상"></div>
+        <div class="fgrp"><label>담당 의사</label><input type="text" id="pDoc" placeholder="예: 이○○ 교수"></div>
+        <div class="fgrp"><label>진단명</label><input type="text" id="pDx" placeholder="예: 지역사회 획득 폐렴 (CAP)"></div>
+        <div class="fgrp"><label>입원일</label><input type="date" id="pAdm"></div>
+      </div>
+    </div>
+
+    <!-- S - 현재상황 -->
+    <div class="card">
+      <div class="chdr">
+        <div class="cico" style="background:var(--sbg);color:var(--sc);font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:14px">S</div>
+        <div><h3>S — Situation · 현재 상황</h3><p>지금 무슨 일이 일어나고 있는지</p></div>
+      </div>
+      <div class="fgrp" style="margin-bottom:14px">
+        <label>주호소 / 현재 상황</label>
+        <textarea id="sChief" rows="3" placeholder="예: 오후 2시경 갑자기 호흡 곤란 호소. 산소포화도 Room air에서 88%까지 저하됨."></textarea>
+      </div>
+
+      <!-- ═══ VITAL SIGNS ═══ -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+        <div class="sec-lbl" style="margin-bottom:0;flex:1">활력징후 (Vital Signs)</div>
+        <!-- Legend -->
+        <div class="v-legend">
+          <span class="v-leg-item"><span class="v-leg-dot vld-n"></span>정상</span>
+          <span class="v-leg-item"><span class="v-leg-dot vld-w"></span>주의</span>
+          <span class="v-leg-item"><span class="v-leg-dot vld-c"></span>위험</span>
+        </div>
+        <button class="sound-toggle" id="soundToggle" onclick="toggleSound()" title="위험 알림 사운드">🔔 알림음</button>
+      </div>
+
+      <div class="vital-grid">
+        <!-- BP -->
+        <div class="vbox" id="vbox-BP">
+          <div class="vbox-lbl">혈압 (BP)</div>
+          <div class="bp-row">
+            <input type="number" id="vSBP" placeholder="120" oninput="evalVitals()" title="수축기 혈압">
+            <span class="bp-sep">/</span>
+            <input type="number" id="vDBP" placeholder="80" oninput="evalVitals()" title="이완기 혈압">
+          </div>
+          <div class="vbox-unit">mmHg (수축기 / 이완기)</div>
+          <div class="vstatus vs-none" id="vs-BP">—</div>
+        </div>
+        <!-- HR -->
+        <div class="vbox" id="vbox-HR">
+          <div class="vbox-lbl">맥박 (HR)</div>
+          <input type="number" id="vHR" placeholder="72" oninput="evalVitals()">
+          <div class="vbox-unit">bpm</div>
+          <div class="vstatus vs-none" id="vs-HR">—</div>
+        </div>
+        <!-- RR -->
+        <div class="vbox" id="vbox-RR">
+          <div class="vbox-lbl">호흡수 (RR)</div>
+          <input type="number" id="vRR" placeholder="16" oninput="evalVitals()">
+          <div class="vbox-unit">회/분</div>
+          <div class="vstatus vs-none" id="vs-RR">—</div>
+        </div>
+        <!-- BT -->
+        <div class="vbox" id="vbox-BT">
+          <div class="vbox-lbl">체온 (BT)</div>
+          <input type="number" id="vBT" placeholder="36.5" step="0.1" oninput="evalVitals()">
+          <div class="vbox-unit">°C</div>
+          <div class="vstatus vs-none" id="vs-BT">—</div>
+        </div>
+        <!-- SpO2 -->
+        <div class="vbox" id="vbox-SP">
+          <div class="vbox-lbl">산소포화도</div>
+          <input type="number" id="vSp" placeholder="98" oninput="evalVitals()">
+          <div class="vbox-unit">SpO₂ (%)</div>
+          <div class="vstatus vs-none" id="vs-SP">—</div>
+        </div>
+      </div>
+
+      <!-- Vital Summary Bar -->
+      <div class="vital-summary" id="vitalSummary" style="display:none">
+        <span class="vs-label">📊 활력징후 요약</span>
+        <div id="vSummaryItems" style="display:flex;gap:12px;flex-wrap:wrap"></div>
+      </div>
+
+      <div class="fgrp gcs-row">
+        <label>의식 상태 (GCS / LOC)</label>
+        <input type="text" id="vGCS" placeholder="예: 명료(Alert), GCS 15점">
+      </div>
+    </div>
+
+    <!-- B -->
+    <div class="card">
+      <div class="chdr"><div class="cico" style="background:var(--bbg);color:var(--bc);font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:14px">B</div><div><h3>B — Background · 관련 배경</h3><p>임상적으로 관련된 과거력 및 치료 정보</p></div></div>
+      <div class="fg">
+        <div class="fgrp full"><label>과거력 / 기저질환</label><textarea id="bHist" rows="2" placeholder="예: 고혈압 10년, 당뇨 5년, 2022년 슬관절 전치환술"></textarea></div>
+        <div class="fgrp full"><label>현재 복용 약물</label><textarea id="bMeds" rows="2" placeholder="예: Amlodipine 5mg QD, Metformin 500mg BID, Aspirin 100mg QD"></textarea></div>
+        <div class="fgrp"><label>알레르기</label><input type="text" id="bAl" placeholder="예: 페니실린 발진 / NKDA"></div>
+        <div class="fgrp"><label>최근 처치 / 시술</label><input type="text" id="bProc" placeholder="예: 입원 2일차, IV 항생제 투여 중"></div>
+      </div>
+    </div>
+
+    <!-- A -->
+    <div class="card">
+      <div class="chdr"><div class="cico" style="background:var(--abg);color:var(--ac);font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:14px">A</div><div><h3>A — Assessment · 임상 사정</h3><p>간호사가 판단하는 문제</p></div></div>
+      <div class="fg">
+        <div class="fgrp full"><label>임상 증상 및 관찰 소견</label><textarea id="aFind" rows="3" placeholder="예: 보조호흡근 사용, 양폐야 수포음 청진, 빠른 얕은 호흡"></textarea></div>
+        <div class="fgrp full"><label>최근 검사 결과</label><textarea id="aLab" rows="2" placeholder="예: WBC 15,800 (↑), CRP 8.5 mg/dL (↑), Chest X-ray 우하엽 침윤"></textarea></div>
+        <div class="fgrp full"><label>간호사의 임상적 판단</label><input type="text" id="aImp" placeholder="예: 폐렴 악화로 인한 저산소혈증 진행 가능성 의심"></div>
+      </div>
+    </div>
+
+    <!-- R -->
+    <div class="card">
+      <div class="chdr"><div class="cico" style="background:var(--rbg);color:var(--rc);font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:14px">R</div><div><h3>R — Recommendation · 권고 사항</h3><p>어떻게 해주기를 원하는가</p></div></div>
+      <div class="fg">
+        <div class="fgrp full"><label>요청 / 의뢰 내용</label><textarea id="rReq" rows="3" placeholder="예: 즉각적 평가 요청, 산소요법 처방, 항생제 변경 논의, 흉부 CT 지시"></textarea></div>
+        <div class="fgrp"><label>보고 대상</label><input type="text" id="rTo" placeholder="예: 당직 의사 / 주치의"></div>
+        <div class="fgrp"><label>보고 일시</label><input type="datetime-local" id="rTime"></div>
+      </div>
+    </div>
+
+    <div class="gen-cta no-print">
+      <button class="main-btn" onclick="generate()">🤖 Gemini 2.5 Flash로 SBAR 생성</button>
+      <small style="display:block;margin-top:8px;font-size:11px;color:var(--muted)">API 미설정 시 입력 데이터 구조화 자동 조합 · 우측 상단 ⚙️에서 Gemini API 키 설정</small>
+    </div>
+  </div><!-- /tab-input -->
+
+  <!-- ═══ RESULT TAB ═══ -->
+  <div id="tab-result" style="display:none">
+    <div id="resultArea">
+      <div class="empty"><div class="emo">📋</div><h3>생성된 보고서가 없습니다</h3><p>SBAR 작성 탭에서 생성 버튼을 클릭하세요</p></div>
+    </div>
+  </div>
+
+  <!-- ═══ HISTORY TAB ═══ -->
+  <div id="tab-history" style="display:none">
+    <div class="card">
+      <div class="chdr">
+        <div class="cico" style="background:#EFF6FF">📁</div>
+        <div><h3>저장된 SBAR 기록</h3><p id="storeLabel">로컬 저장 · 이 브라우저에만</p></div>
+        <div style="margin-left:auto;display:flex;gap:7px">
+          <button class="btn btn-o btn-sm" onclick="loadHistory()">🔄</button>
+          <button class="btn btn-o btn-sm" onclick="clearAll()">🗑️ 전체 삭제</button>
+        </div>
+      </div>
+      <div id="histList"></div>
+    </div>
+  </div>
+</div><!-- /wrap -->
+
+<!-- CHATBOT FAB -->
+<button class="chat-fab no-print" id="chatFab" onclick="toggleChat()" title="AI 간호 도우미">
+  <span id="fabIcon">💬</span>
+</button>
+
+<!-- CHATBOT -->
+<div class="chatbot no-print" id="chatbot">
+  <div class="chat-hdr">
+    <div class="chat-av">🤖</div>
+    <div class="chat-info"><strong>SBAR AI 간호 도우미</strong><span>Gemini 2.5 Flash · 임상·SBAR 답변</span></div>
+    <button class="chat-x" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-msgs" id="chatMsgs">
+    <div class="msg bot"><div class="mav">🤖</div><div class="bubble">안녕하세요! SBAR 작성 및 임상 간호 질문에 답변드립니다. 상단 ⚙️에서 Gemini API 키 설정 후 AI 답변이 활성화됩니다. 💙</div></div>
+  </div>
+  <div id="typingRow" class="typing" style="display:none">
+    <div class="mav" style="width:24px;height:24px;border-radius:50%;background:var(--bg);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:12px">🤖</div>
+    <span></span><span></span><span></span>
+  </div>
+  <div class="qwrap" id="qWrap">
+    <button class="qbtn" onclick="qAsk('SBAR이란 무엇인가요?')">SBAR이란?</button>
+    <button class="qbtn" onclick="qAsk('S(Situation) 작성 핵심 팁')">S 작성법</button>
+    <button class="qbtn" onclick="qAsk('폐렴 환자 SBAR 예시')">폐렴 예시</button>
+    <button class="qbtn" onclick="qAsk('SpO₂가 낮을 때 간호 중재')">SpO₂↓ 중재</button>
+    <button class="qbtn" onclick="qAsk('활력징후 위험 범위를 알려주세요')">위험 수치</button>
+  </div>
+  <div class="chat-nokey" id="chatNoKey">⚠️ Gemini API 미설정 &mdash; <button onclick="openModal()" style="background:none;border:none;color:var(--pri);cursor:pointer;font-weight:700;font-size:11px;padding:0">⚙️ 설정</button></div>
+  <div class="chat-inp">
+    <input type="text" id="chatIn" placeholder="임상·SBAR 질문을 입력하세요…" onkeydown="if(event.key==='Enter')sendChat()">
+    <button class="send-btn" onclick="sendChat()">➤</button>
+  </div>
+</div>
+
+<!-- ════════════ JAVASCRIPT ════════════ -->
+<script>
+/* ─── GLOBALS ─── */
+const MODEL = 'gemini-2.5-flash';
+let fbApp=null, fbDb=null;
+let currentReport=null;
+let chatHistory=[];
+let chatIsOpen=false;
+let gVisible=false;
+let soundEnabled=true;
+let lastCritState=false;
+let _histCache=[], _histIsFb=false;
+let audioCtx=null;
+
+/* ─── INIT ─── */
+document.getElementById('rTime').value=new Date().toISOString().slice(0,16);
+document.getElementById('pAdm').value=new Date().toISOString().slice(0,10);
+(function init(){
+  const c=getCfg();
+  if(c.gKey){document.getElementById('gKey').value=c.gKey; updateGBadge(c.gKey);}
+  if(c.fbKey) document.getElementById('fbKey').value=c.fbKey;
+  if(c.fbPid) document.getElementById('fbPid').value=c.fbPid;
+  if(c.fbAid) document.getElementById('fbAid').value=c.fbAid;
+  if(c.fbAdom) document.getElementById('fbAdom').value=c.fbAdom;
+  if(c.fbKey&&c.fbPid) waitFb(c);
+  updateHdrBadge(); refreshBadge(); updateChatNoKey();
+})();
+
+/* ─── VITAL SIGN EVALUATION ─── */
+// Status: 'normal'|'warn'|'crit'|'none'
+const VITAL_RANGES = {
+  SBP: { normal:[90,139], warn_lo:[80,89], warn_hi:[140,159], crit_lo:[null,79], crit_hi:[160,null] },
+  DBP: { normal:[60,89],  warn_lo:[50,59], warn_hi:[90,99],  crit_lo:[null,49], crit_hi:[100,null] },
+  HR:  { normal:[60,100], warn_lo:[50,59], warn_hi:[101,119],crit_lo:[null,49], crit_hi:[120,null] },
+  RR:  { normal:[12,20],  warn_lo:[10,11], warn_hi:[21,25],  crit_lo:[null,9],  crit_hi:[26,null] },
+  BT:  { normal:[36.0,37.4], warn_lo:[35.5,35.9], warn_hi:[37.5,38.4], crit_lo:[null,35.4], crit_hi:[38.5,null] },
+  SP:  { normal:[95,100], warn_lo:[90,94], crit_lo:[null,89] },
+};
+
+function classifyVal(key, val){
+  if(val===null||isNaN(val)) return 'none';
+  const r=VITAL_RANGES[key];
+  // Check critical first
+  if(r.crit_lo && r.crit_lo[1]!==null && val <= r.crit_lo[1]) return 'crit';
+  if(r.crit_hi && r.crit_hi[0]!==null && val >= r.crit_hi[0]) return 'crit';
+  // Check warning
+  if(r.warn_lo && r.warn_lo[0]!==null && val >= r.warn_lo[0] && val <= r.warn_lo[1]) return 'warn';
+  if(r.warn_hi && r.warn_hi[0]!==null && val >= r.warn_hi[0] && r.warn_hi[1]!==null && val <= r.warn_hi[1]) return 'warn';
+  if(r.warn_hi && r.warn_hi[0]!==null && r.warn_hi[1]===null && val >= r.warn_hi[0]) return 'warn';
+  // Normal range
+  if(r.normal && val >= r.normal[0] && val <= r.normal[1]) return 'normal';
+  return 'none';
+}
+
+const STATUS_LABELS = { normal:'정상', warn:'주의', crit:'위험', none:'—' };
+const STATUS_ICONS  = { normal:'✅', warn:'⚠️', crit:'🚨', none:'' };
+const STATUS_CSS    = { normal:'vs-normal', warn:'vs-warn', crit:'vs-crit', none:'vs-none' };
+const BOX_CSS       = { normal:'v-normal', warn:'v-warn', crit:'v-crit', none:'' };
+
+function evalVitals(){
+  const sbp = parseFloat(document.getElementById('vSBP').value);
+  const dbp = parseFloat(document.getElementById('vDBP').value);
+  const hr  = parseFloat(document.getElementById('vHR').value);
+  const rr  = parseFloat(document.getElementById('vRR').value);
+  const bt  = parseFloat(document.getElementById('vBT').value);
+  const sp  = parseFloat(document.getElementById('vSp').value);
+
+  const sbpS=classifyVal('SBP',sbp), dbpS=classifyVal('DBP',dbp);
+  const hrS=classifyVal('HR',hr), rrS=classifyVal('RR',rr);
+  const btS=classifyVal('BT',bt), spS=classifyVal('SP',sp);
+
+  // BP: take the worse of SBP and DBP
+  const bpPriority=['crit','warn','normal','none'];
+  const bpS = bpPriority[Math.min(bpPriority.indexOf(sbpS), bpPriority.indexOf(dbpS))];
+
+  const vitals = [
+    {id:'BP', status:bpS, label:`BP ${isNaN(sbp)?'?':sbp}/${isNaN(dbp)?'?':dbp} mmHg`},
+    {id:'HR', status:hrS, label:`HR ${isNaN(hr)?'?':hr} bpm`},
+    {id:'RR', status:rrS, label:`RR ${isNaN(rr)?'?':rr}/분`},
+    {id:'BT', status:btS, label:`BT ${isNaN(bt)?'?':bt}°C`},
+    {id:'SP', status:spS, label:`SpO₂ ${isNaN(sp)?'?':sp}%`},
+  ];
+
+  let hasCrit=false, hasWarn=false;
+
+  vitals.forEach(v=>{
+    const box=document.getElementById('vbox-'+v.id);
+    const badge=document.getElementById('vs-'+v.id);
+    if(!box||!badge) return;
+    // Reset box classes
+    box.className='vbox';
+    if(v.status!=='none') box.classList.add('v-'+v.status);
+    // Badge
+    badge.className='vstatus '+STATUS_CSS[v.status];
+    badge.innerHTML=v.status!=='none'?`${STATUS_ICONS[v.status]} ${STATUS_LABELS[v.status]}`:'—';
+    if(v.status==='crit') hasCrit=true;
+    if(v.status==='warn') hasWarn=true;
+  });
+
+  // Summary bar
+  const summaryBar=document.getElementById('vitalSummary');
+  const summaryItems=document.getElementById('vSummaryItems');
+  const hasAny=vitals.some(v=>v.status!=='none');
+  summaryBar.style.display=hasAny?'flex':'none';
+  if(hasAny){
+    summaryItems.innerHTML=vitals.filter(v=>v.status!=='none').map(v=>`
+      <div class="vs-item">
+        <span class="vs-dot ${v.status==='normal'?'vs-dot-ok':v.status==='warn'?'vs-dot-warn':'vs-dot-crit'}"></span>
+        <span>${v.label}</span>
+      </div>`).join('');
+  }
+
+  // Critical alert sound
+  if(hasCrit && !lastCritState && soundEnabled){
+    playCritAlert();
+  }
+  lastCritState=hasCrit;
+}
+
+/* ─── WEB AUDIO ALERT ─── */
+function getAudioCtx(){
+  if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playCritAlert(){
+  try{
+    const ctx=getAudioCtx();
+    // Urgent triple beep
+    [0, 0.25, 0.5].forEach(delay=>{
+      const osc=ctx.createOscillator();
+      const gain=ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.setValueAtTime(880, ctx.currentTime+delay);
+      osc.frequency.setValueAtTime(1100, ctx.currentTime+delay+0.05);
+      gain.gain.setValueAtTime(0.4, ctx.currentTime+delay);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+delay+0.18);
+      osc.start(ctx.currentTime+delay);
+      osc.stop(ctx.currentTime+delay+0.2);
+    });
+  }catch(e){ console.warn('Audio error:',e); }
+}
+
+function playWarnTone(){
+  try{
+    const ctx=getAudioCtx();
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value=660;
+    gain.gain.setValueAtTime(0.25, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.3);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime+0.35);
+  }catch(e){}
+}
+
+function toggleSound(){
+  soundEnabled=!soundEnabled;
+  const btn=document.getElementById('soundToggle');
+  btn.innerHTML=soundEnabled?'🔔 알림음':'🔕 무음';
+  btn.className='sound-toggle'+(soundEnabled?'':' muted-state');
+  showToast(soundEnabled?'🔔 위험 알림음 활성화':'🔕 알림음 꺼짐');
+}
+
+/* ─── CONFIG ─── */
+function getCfg(){ return JSON.parse(localStorage.getItem('sbar_cfg')||'{}'); }
+function openModal(){ document.getElementById('settingsModal').classList.add('on'); }
+function closeModal(){ document.getElementById('settingsModal').classList.remove('on'); }
+function onGInput(){ updateGBadge(document.getElementById('gKey').value); }
+function tgVis(){ gVisible=!gVisible; document.getElementById('gKey').type=gVisible?'text':'password'; }
+
+function saveCfg(){
+  const cfg={
+    gKey:document.getElementById('gKey').value.trim(),
+    fbKey:document.getElementById('fbKey').value.trim(),
+    fbPid:document.getElementById('fbPid').value.trim(),
+    fbAid:document.getElementById('fbAid').value.trim(),
+    fbAdom:document.getElementById('fbAdom').value.trim(),
+  };
+  localStorage.setItem('sbar_cfg',JSON.stringify(cfg));
+  updateGBadge(cfg.gKey);
+  if(cfg.fbKey&&cfg.fbPid) waitFb(cfg);
+  updateHdrBadge(); closeModal();
+  showToast('💾 설정 저장됨');
+  updateChatNoKey();
+}
+
+function clearCfg(){
+  if(!confirm('설정을 초기화할까요?')) return;
+  localStorage.removeItem('sbar_cfg');
+  ['gKey','fbKey','fbPid','fbAid','fbAdom'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  fbApp=null; fbDb=null;
+  updateGBadge(''); updateFbBadge(false); updateHdrBadge(); updateChatNoKey();
+  showToast('설정 초기화됨');
+}
+
+function updateGBadge(k){
+  const el=document.getElementById('gBadge');
+  if(k&&k.startsWith('AIza')){ el.className='mbadge m-ai'; el.textContent='🟢 연결됨'; }
+  else if(k){ el.className='mbadge m-err'; el.textContent='❌ 키 오류'; }
+  else { el.className='mbadge m-off'; el.textContent='미설정'; }
+}
+function updateFbBadge(ok){
+  const el=document.getElementById('fbBadge');
+  if(ok){ el.className='mbadge m-ok'; el.textContent='🔥 연결됨'; document.getElementById('storeLabel').textContent='Firebase Firestore 저장'; }
+  else { el.className='mbadge m-off'; el.textContent='미설정'; document.getElementById('storeLabel').textContent='로컬 저장 · 이 브라우저에만'; }
+}
+function updateHdrBadge(){
+  const c=getCfg(); const el=document.getElementById('hdrBadge');
+  const hG=c.gKey&&c.gKey.startsWith('AIza'), hF=c.fbKey&&c.fbPid;
+  if(hG&&hF){ el.className='hdr-badge hbadge-ok'; el.textContent='🤖 Gemini 2.5 + 🔥 Firebase'; }
+  else if(hG){ el.className='hdr-badge hbadge-ok'; el.textContent='🤖 Gemini 2.5 Flash 활성'; }
+  else { el.className='hdr-badge hbadge-off'; el.textContent='⚙️ 설정 필요'; }
+}
+function updateChatNoKey(){
+  const k=getCfg().gKey||'';
+  document.getElementById('chatNoKey').style.display=(!k||!k.startsWith('AIza'))?'block':'none';
+}
+
+/* ─── FIREBASE ─── */
+function waitFb(cfg,t=0){
+  if(window._fbReady) initFb(cfg);
+  else if(t<20) setTimeout(()=>waitFb(cfg,t+1),300);
+}
+async function initFb(cfg){
+  try{
+    const {initializeApp,getApps,getFirestore}=window._fb;
+    const existing=getApps().find(a=>a.name==='sbar-app');
+    fbApp=existing||initializeApp({
+      apiKey:cfg.fbKey,
+      authDomain:cfg.fbAdom||`${cfg.fbPid}.firebaseapp.com`,
+      projectId:cfg.fbPid,
+      appId:cfg.fbAid
+    },'sbar-app');
+    fbDb=getFirestore(fbApp);
+    updateFbBadge(true); refreshBadge();
+    showToast('🔥 Firebase 연결 성공');
+  }catch(e){ console.error(e); updateFbBadge(false); showToast('⚠️ Firebase 연결 실패','warn'); }
+}
+async function fbSave(r){ if(!fbDb) return false; try{ await window._fb.addDoc(window._fb.collection(fbDb,'sbar_records'),r); return true; }catch(e){ return false; } }
+async function fbLoad(){ if(!fbDb) return null; try{ const q=window._fb.query(window._fb.collection(fbDb,'sbar_records'),window._fb.orderBy('ts','desc'),window._fb.limit(100)); const s=await window._fb.getDocs(q); return s.docs.map(d=>({...d.data(),_id:d.id})); }catch(e){ return null; } }
+async function fbDel(id){ if(!fbDb||!id) return; try{ await window._fb.deleteDoc(window._fb.doc(fbDb,'sbar_records',id)); }catch(e){} }
+
+/* ─── TABS ─── */
+function goTab(t){
+  ['input','result','history'].forEach(id=>{ document.getElementById('tab-'+id).style.display=id===t?'block':'none'; });
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{ b.classList.toggle('active',['input','result','history'][i]===t); });
+  if(t==='history') loadHistory();
+}
+
+/* ─── DEMO ─── */
+function fillDemo(){
+  const f=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v;};
+  f('pName','김○○'); f('pAge','68'); document.getElementById('pGen').value='여성';
+  f('pRoom','305호 2번 병상'); f('pDoc','이○○ 교수');
+  f('pDx','지역사회 획득 폐렴 (Community-acquired Pneumonia)');
+  f('pAdm',new Date(Date.now()-2*86400000).toISOString().slice(0,10));
+  f('sChief','오늘 오후 2시경 갑자기 호흡 곤란 호소. 산소포화도 Room air에서 88%까지 저하됨. 말하기 힘들다고 함.');
+  f('vSBP','148'); f('vDBP','92'); f('vHR','108'); f('vRR','26'); f('vBT','38.7'); f('vSp','88');
+  f('vGCS','명료(Alert), 불안 양상');
+  f('bHist','고혈압 10년, 제2형 당뇨병 5년, 2022년 좌측 슬관절 전치환술');
+  f('bMeds','Amlodipine 5mg QD, Metformin 500mg BID, Aspirin 100mg QD');
+  f('bAl','NKDA'); f('bProc','입원 2일차, Ampicillin-sulbactam 3g q8h IV 투여 중, NC 2L/min 적용 중');
+  f('aFind','청색증 없으나 보조호흡근 사용 관찰. 양폐야 하부 수포음(crackles) 청진. 빠른 얕은 호흡.');
+  f('aLab','WBC 15,800/μL(↑), CRP 8.5mg/dL(↑), Procalcitonin 1.2ng/mL(↑)\nChest X-ray: 우하엽 침윤 소견 악화\nABG(room air): PaO₂ 68mmHg');
+  f('aImp','폐렴 악화로 인한 저산소혈증 진행 중. 현 항생제 호전 불충분 가능성.');
+  f('rReq','즉각적인 환자 평가 요청. 산소 유량 증량(NC→마스크 변경) 처방. 흉부 CT 및 항생제 변경 논의. 혈액 배양 추가.');
+  f('rTo','당직 의사');
+  evalVitals(); // trigger vital evaluation
+  showToast('✅ 데모 데이터 입력 완료 (활력징후 상태 확인하세요)');
+}
+
+/* ─── COLLECT FORM ─── */
+function collect(){
+  const g=id=>document.getElementById(id)?.value?.trim()||'';
+  return{
+    pName:g('pName'),pAge:g('pAge'),pGender:document.getElementById('pGen').value,
+    pRoom:g('pRoom'),pDoc:g('pDoc'),pDx:g('pDx'),pAdm:g('pAdm'),
+    sChief:g('sChief'),
+    vSBP:g('vSBP'),vDBP:g('vDBP'),vHR:g('vHR'),vRR:g('vRR'),vBT:g('vBT'),vSp:g('vSp'),vGCS:g('vGCS'),
+    bHist:g('bHist'),bMeds:g('bMeds'),bAl:g('bAl'),bProc:g('bProc'),
+    aFind:g('aFind'),aLab:g('aLab'),aImp:g('aImp'),
+    rReq:g('rReq'),rTo:g('rTo'),rTime:g('rTime')
+  };
+}
+
+/* ─── GENERATE ─── */
+async function generate(){
+  const d=collect();
+  if(!d.sChief&&!d.pDx){ showToast('⚠️ 주호소 또는 진단명 입력 필요','warn'); return; }
+  const k=getCfg().gKey||'';
+  if(k&&k.startsWith('AIza')) await geminiGen(d,k);
+  else manualGen(d);
+}
+
+async function geminiGen(d,key){
+  setLoading(true,'Gemini 2.5 Flash AI가 보고서를 작성 중…');
+  const days=d.pAdm?Math.floor((Date.now()-new Date(d.pAdm))/86400000)+1:null;
+  const bp=d.vSBP&&d.vDBP?`${d.vSBP}/${d.vDBP}mmHg`:'미측정';
+  const vt=`혈압:${bp}, 맥박:${d.vHR||'미측정'}bpm, 호흡수:${d.vRR||'미측정'}회/분, 체온:${d.vBT||'미측정'}°C, SpO₂:${d.vSp||'미측정'}%${d.vGCS?`, 의식:${d.vGCS}`:''}`;
+  const prompt=`당신은 한국 병원의 숙련된 임상 간호사입니다. 아래 환자 정보를 바탕으로 전문적인 SBAR 보고서를 작성하고 JSON 객체만 반환하세요. 마크다운 코드블록 없이 JSON만 응답합니다.
+
+환자: ${d.pName||'?'}(${d.pAge||'?'}세 ${d.pGender||''}) | 병실:${d.pRoom||'-'} | 담당의:${d.pDoc||'-'}
+진단: ${d.pDx||'-'}${days?` | 입원 ${days}일차`:''}
+현재 상황: ${d.sChief||'미입력'}
+활력징후: ${vt}
+과거력: ${d.bHist||'없음'} | 복용 약물: ${d.bMeds||'없음'} | 알레르기: ${d.bAl||'NKDA'}
+최근 처치: ${d.bProc||'없음'}
+임상 소견: ${d.aFind||'-'} | 검사: ${d.aLab||'없음'} | 판단: ${d.aImp||'-'}
+요청 내용: ${d.rReq||'-'} | 보고 대상: ${d.rTo||'-'}
+
+반환 형식 (JSON only):
+{"S":"","B":"","A":"","R":""}
+
+작성 기준:
+- S: 환자 식별 + 현재 상황 + 활력징후 요약 (2~4문장, 수치 명시)
+- B: 과거력·약물·처치 경과 등 임상 배경 (2~4문장)
+- A: 관찰 소견 + 검사 결과 + 간호사의 임상적 사정 (2~4문장)
+- R: 구체적 요청 사항과 우선순위 (1~3문장)`;
+
+  try{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${key}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        contents:[{parts:[{text:prompt}]}],
+        generationConfig:{temperature:0.3,maxOutputTokens:1500,thinkingConfig:{thinkingBudget:0}}
+      })
+    });
+    if(!res.ok){ const e=await res.json(); throw new Error(e.error?.message||'HTTP '+res.status); }
+    const data=await res.json();
+    const raw=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    const clean=raw.replace(/```json|```/g,'').trim();
+    const sbar=JSON.parse(clean);
+    finish(d,sbar,'Gemini 2.5 Flash');
+  }catch(e){
+    showToast('⚠️ Gemini 오류: '+e.message+' → 수동 생성','warn');
+    manualGen(d);
+  }finally{ setLoading(false); }
+}
+
+function manualGen(d){
+  const days=d.pAdm?Math.floor((Date.now()-new Date(d.pAdm))/86400000)+1:null;
+  const bp=d.vSBP&&d.vDBP?`혈압 ${d.vSBP}/${d.vDBP}mmHg`:(d.vSBP?`수축기혈압 ${d.vSBP}mmHg`:'');
+  const vt=[bp,d.vHR&&`맥박 ${d.vHR}bpm`,d.vRR&&`호흡수 ${d.vRR}회/분`,d.vBT&&`체온 ${d.vBT}°C`,d.vSp&&`SpO₂ ${d.vSp}%`].filter(Boolean).join(', ');
+  const sbar={
+    S:[`${d.pName||'환자'}(${d.pAge||'?'}세 ${d.pGender||''})님`,d.pRoom?` ${d.pRoom} 입원`:'',d.pDx?`, ${d.pDx}${days?` 입원 ${days}일차`:''}입니다. `:'.',d.sChief?`현재 ${d.sChief}. `:'',vt?`활력징후: ${vt}${d.vGCS?`, 의식 ${d.vGCS}`:''}.`:''].filter(Boolean).join(''),
+    B:[d.bHist?`과거력: ${d.bHist}. `:'',d.bMeds?`복용 약물: ${d.bMeds}. `:'',d.bAl?`알레르기: ${d.bAl}. `:'',d.bProc?`${d.bProc}.`:''].filter(Boolean).join('')||'특이 과거력 없음.',
+    A:[d.aFind?`${d.aFind} `:'',d.aLab?`검사: ${d.aLab}. `:'',d.aImp?`판단: ${d.aImp}.`:''].filter(Boolean).join('')||'임상 소견 추가 확인 요함.',
+    R:[d.rReq?`${d.rReq} `:'',d.rTo?`${d.rTo}의 즉각적 평가와 지시를 요청합니다.`:'담당 의사의 즉각적 평가를 요청합니다.'].filter(Boolean).join(''),
+  };
+  finish(d,sbar,'수동 생성');
+}
+
+function finish(d,sbar,mode){
+  currentReport={...d,sbar,mode,ts:new Date().toISOString()};
+  renderResult(currentReport);
+  goTab('result');
+  showToast(mode.includes('Gemini')?'🤖 Gemini 2.5 Flash 보고서 생성 완료':'📋 보고서 생성 완료');
+}
+
+/* ─── RENDER RESULT ─── */
+function renderResult(r){
+  const {pName,pAge,pGender,pRoom,pDoc,pDx,sbar,mode,ts,rTime,rTo}=r;
+  const tStr=rTime?new Date(rTime).toLocaleString('ko-KR'):new Date(ts).toLocaleString('ko-KR');
+  const days=r.pAdm?Math.floor((Date.now()-new Date(r.pAdm))/86400000)+1:null;
+  const isAI=mode&&mode.includes('Gemini');
+  const secs=[
+    {k:'S',lbl:'Situation',desc:'현재 상황',cls:'ss',hint:'지금 무슨 일이 일어나고 있는지'},
+    {k:'B',lbl:'Background',desc:'관련 배경',cls:'sb',hint:'임상적으로 관련된 배경 정보'},
+    {k:'A',lbl:'Assessment',desc:'임상 사정',cls:'sa',hint:'나는 이 문제가 무엇이라고 생각하는가'},
+    {k:'R',lbl:'Recommendation',desc:'권고 사항',cls:'sr',hint:'어떻게 해주기를 원하는가'},
+  ];
+  document.getElementById('resultArea').innerHTML=`
+  <div class="pt-banner no-print">
+    <div style="font-size:32px">👤</div>
+    <div style="flex:1">
+      <div class="pt-name">${pName||'환자'} ${pAge?`(${pAge}세 ${pGender||''})`:''}</div>
+      <div class="pt-detail">${pDx||''}${days?` · 입원 ${days}일차`:''}${pRoom?` · ${pRoom}`:''}${pDoc?` · 담당: ${pDoc}`:''}</div>
+    </div>
+    <div class="pt-meta">📅 ${tStr}<br>${rTo?`📢 ${rTo} 보고<br>`:''}
+      <span class="mbadge ${isAI?'m-ai':'m-ok'}" style="font-size:10px;margin-top:4px;display:inline-flex">${isAI?'🤖 Gemini 2.5 Flash':'📝 수동'}</span>
+    </div>
+  </div>
+  <div class="act-bar no-print">
+    <button class="btn btn-g btn-sm" onclick="saveRecord()">💾 저장</button>
+    <button class="btn btn-o btn-sm" onclick="copyAll()">📋 복사</button>
+    <button class="btn btn-o btn-sm" onclick="exportPDF()">📄 PDF</button>
+    <button class="btn btn-o btn-sm" onclick="window.print()">🖨️ 인쇄</button>
+    <button class="btn btn-o btn-sm" id="editBtn" onclick="toggleEdit()">✏️ 수정</button>
+    <button class="btn btn-o btn-sm" onclick="goTab('input')">↩️ 재작성</button>
+  </div>
+  <div id="editInd" style="display:none" class="no-print"><span class="edit-ind">✏️ 수정 모드 — 텍스트 직접 편집 · 「완료」 클릭 시 저장</span></div>
+  <div id="sbarSecs">
+    ${secs.map(s=>`
+    <div class="sbar-sec ${s.cls}">
+      <div class="sbar-hd"><div class="skey">${s.k}</div><div class="sht"><h4>${s.lbl} · ${s.desc}</h4><p>${s.hint}</p></div></div>
+      <div class="sbar-body" id="sb-${s.k}">${sbar[s.k]||'—'}</div>
+    </div>`).join('')}
+  </div>
+  <div style="text-align:center;padding:13px;font-size:11px;color:var(--muted)" class="no-print">청암대학교 간호학과 · AI융합 간호정보학 · 담당교수: 제프리 교수</div>`;
+}
+
+/* ─── EDIT ─── */
+let editMode=false;
+function toggleEdit(){
+  editMode=!editMode;
+  ['S','B','A','R'].forEach(k=>{ const el=document.getElementById('sb-'+k); if(el) el.contentEditable=editMode?'true':'false'; });
+  document.getElementById('editInd').style.display=editMode?'block':'none';
+  document.getElementById('editBtn').textContent=editMode?'✅ 완료':'✏️ 수정';
+  if(!editMode&&currentReport){
+    ['S','B','A','R'].forEach(k=>{ const el=document.getElementById('sb-'+k); if(el) currentReport.sbar[k]=el.innerText; });
+    showToast('✅ 수정 반영됨');
+  }
+}
+
+/* ─── COPY ─── */
+function copyAll(){
+  if(!currentReport) return;
+  const {pName,pAge,pGender,pDx,sbar,rTime,rTo}=currentReport;
+  const txt=`[SBAR 보고서]\n환자: ${pName||'?'}(${pAge||'?'}세 ${pGender||''}) / 진단: ${pDx||''}\n보고일시: ${rTime?new Date(rTime).toLocaleString('ko-KR'):'미입력'} / 보고 대상: ${rTo||'미입력'}\n\n■ S (Situation)\n${sbar.S}\n\n■ B (Background)\n${sbar.B}\n\n■ A (Assessment)\n${sbar.A}\n\n■ R (Recommendation)\n${sbar.R}\n\n— 청암대학교 간호학과 AI SBAR 생성기 (Gemini 2.5 Flash) —`;
+  navigator.clipboard.writeText(txt).then(()=>showToast('📋 클립보드에 복사됨'));
+}
+
+/* ─── PDF ─── */
+function exportPDF(){
+  const el=document.getElementById('sbarSecs');
+  if(!el){ showToast('❌ 보고서 없음','err'); return; }
+  const fn=`SBAR_${currentReport?.pName||'report'}_${new Date().toISOString().slice(0,10)}.pdf`;
+  html2pdf().from(el).set({
+    margin:[12,12,12,12],filename:fn,
+    image:{type:'jpeg',quality:.97},
+    html2canvas:{scale:2,useCORS:true,logging:false},
+    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
+  }).save().then(()=>showToast('✅ PDF 저장됨')).catch(()=>showToast('❌ PDF 실패 — 인쇄 이용','err'));
+}
+
+/* ─── SAVE/HISTORY ─── */
+async function saveRecord(){
+  if(!currentReport) return;
+  if(fbDb){ const ok=await fbSave(currentReport); if(ok){ showToast('🔥 Firebase에 저장됨'); refreshBadge(); return; } }
+  const h=JSON.parse(localStorage.getItem('sbar_v2')||'[]');
+  h.unshift({...currentReport,_lid:Date.now()});
+  if(h.length>100) h.pop();
+  localStorage.setItem('sbar_v2',JSON.stringify(h));
+  refreshBadge(); showToast('💾 로컬 저장됨');
+}
+
+async function loadHistory(){
+  if(fbDb){ const r=await fbLoad(); if(r!==null){ renderHist(r,true); return; } }
+  renderHist(JSON.parse(localStorage.getItem('sbar_v2')||'[]'),false);
+}
+
+function renderHist(list,isFb){
+  _histCache=list; _histIsFb=isFb;
+  const cont=document.getElementById('histList');
+  if(!list||!list.length){ cont.innerHTML=`<div class="empty"><div class="emo">📂</div><h3>저장된 기록 없음</h3><p>보고서 생성 후 저장 버튼을 클릭하세요</p></div>`; return; }
+  cont.innerHTML=list.map((r,i)=>`
+  <div class="hist-item" onclick="loadRec(${i})">
+    <div class="hist-ico">🏥</div>
+    <div style="flex:1">
+      <div style="font-size:14px;font-weight:600">${r.pName||'환자'} (${r.pAge||'?'}세 ${r.pGender||''})</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">${r.pDx||'진단 없음'}${r.pRoom?` · ${r.pRoom}`:''}
+        <span class="mbadge ${r.mode&&r.mode.includes('Gemini')?'m-ai':'m-ok'}" style="font-size:10px;padding:1px 6px;margin-left:5px">${r.mode&&r.mode.includes('Gemini')?'🤖 AI':'📝 수동'}</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
+      <div style="font-size:11px;color:var(--muted)">${r.ts?new Date(r.ts).toLocaleString('ko-KR'):'-'}</div>
+      <button class="btn btn-o btn-xs" onclick="event.stopPropagation();delRec(${i})">🗑️</button>
+    </div>
+  </div>`).join('');
+}
+
+function loadRec(idx){ const r=_histCache[idx]; if(!r) return; currentReport=r; renderResult(r); goTab('result'); }
+async function delRec(idx){
+  const r=_histCache[idx]; if(!r) return;
+  if(_histIsFb&&r._id){ await fbDel(r._id); showToast('🗑️ Firebase에서 삭제됨'); }
+  else { let h=JSON.parse(localStorage.getItem('sbar_v2')||'[]'); h.splice(idx,1); localStorage.setItem('sbar_v2',JSON.stringify(h)); showToast('🗑️ 삭제됨'); }
+  refreshBadge(); loadHistory();
+}
+async function clearAll(){
+  if(!confirm('모든 기록을 삭제할까요?')) return;
+  if(_histIsFb&&fbDb){ for(const r of _histCache) if(r._id) await fbDel(r._id); }
+  else localStorage.removeItem('sbar_v2');
+  refreshBadge(); loadHistory(); showToast('🗑️ 전체 삭제됨');
+}
+async function refreshBadge(){
+  const el=document.getElementById('histBadge');
+  try{ if(fbDb){ const r=await fbLoad(); const n=r?.length||0; el.style.display=n>0?'inline':'none'; el.textContent=n; return; } }catch(e){}
+  const h=JSON.parse(localStorage.getItem('sbar_v2')||'[]');
+  el.style.display=h.length>0?'inline':'none'; el.textContent=h.length;
+}
+
+/* ─── CHATBOT ─── */
+function toggleChat(){
+  chatIsOpen=!chatIsOpen;
+  document.getElementById('chatbot').classList.toggle('open',chatIsOpen);
+  document.getElementById('fabIcon').textContent=chatIsOpen?'✕':'💬';
+  if(chatIsOpen) updateChatNoKey();
+}
+function qAsk(q){ document.getElementById('chatIn').value=q; sendChat(); }
+
+async function sendChat(){
+  const inp=document.getElementById('chatIn');
+  const q=inp.value.trim(); if(!q) return;
+  inp.value='';
+  addMsg('user',q);
+  document.getElementById('qWrap').style.display='none';
+  chatHistory.push({role:'user',parts:[{text:q}]});
+  const key=getCfg().gKey||'';
+  if(!key||!key.startsWith('AIza')){
+    addMsg('bot','Gemini API 키가 설정되지 않았습니다. 상단 ⚙️ 버튼에서 키를 입력해 주세요.\n\nSBAR은 Situation·Background·Assessment·Recommendation의 약자로 의료진 간 표준화된 커뮤니케이션 프레임워크입니다.');
+    return;
+  }
+  setTyping(true);
+  try{
+    const sys='당신은 한국 간호교육 전문가로 SBAR 보고 양식, 임상 간호, 환자 안전, 활력징후 해석에 대해 교육합니다. 한국어로 명확하고 임상적으로 정확하게 답변하세요.';
+    const msgs=[{role:'user',parts:[{text:sys}]},{role:'model',parts:[{text:'네, 도와드리겠습니다.'}]},...chatHistory.slice(-10)];
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${key}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:msgs,generationConfig:{temperature:0.6,maxOutputTokens:700,thinkingConfig:{thinkingBudget:0}}})
+    });
+    const data=await res.json();
+    const reply=data.candidates?.[0]?.content?.parts?.[0]?.text||'답변을 생성하지 못했습니다.';
+    chatHistory.push({role:'model',parts:[{text:reply}]});
+    setTyping(false); addMsg('bot',reply);
+  }catch(e){ setTyping(false); addMsg('bot','오류: '+e.message); }
+}
+
+function addMsg(role,text){
+  const cont=document.getElementById('chatMsgs');
+  const d=document.createElement('div');
+  d.className='msg '+role;
+  d.innerHTML=`<div class="mav">${role==='bot'?'🤖':'👤'}</div><div class="bubble">${text.replace(/\n/g,'<br>')}</div>`;
+  cont.appendChild(d); cont.scrollTop=cont.scrollHeight;
+}
+function setTyping(on){ document.getElementById('typingRow').style.display=on?'flex':'none'; if(on) document.getElementById('chatMsgs').scrollTop=9999; }
+
+/* ─── LOADING ─── */
+function setLoading(on,msg){ document.getElementById('ldOv').classList.toggle('on',on); if(msg) document.getElementById('ldMsg').textContent=msg; }
+
+/* ─── TOAST ─── */
+let _tt;
+function showToast(msg,type='info'){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.style.background=type==='err'?'#b91c1c':type==='warn'?'#92400e':'#0f2a3c';
+  el.classList.add('show');
+  clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove('show'),3500);
+}
+const toast=showToast;
+</script>
+</body>
+</html>
