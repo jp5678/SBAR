@@ -839,7 +839,7 @@ function saveRecord(){
   if(!currentReport)return;
   if(!fbDb){showToast('⚠️ Firebase 연결 중입니다. 잠시 후 다시 시도하세요','warn');return;}
   fbSave(currentReport).then(function(ok){
-    if(ok){showToast('🔥 Firebase에 저장됨');refreshBadge();}
+    if(ok){showToast('✅ 저장되었습니다.');refreshBadge();}
     else showToast('❌ 저장 실패 — Firestore 보안 규칙 확인','err');
   });
 }
