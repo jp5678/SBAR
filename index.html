@@ -681,19 +681,30 @@ function aiAutoFill(){
   var btn=document.getElementById('demoBtn');
   btn.classList.add('loading');document.getElementById('demoBtnTxt').textContent='AI 케이스 생성 중…';
   var sc=SCENARIOS[Math.floor(Math.random()*SCENARIOS.length)];
-  var prompt='당신은 한국 임상 간호 교육 전문가입니다. 아래 시나리오로 SBAR 실습용 가상 환자 데이터를 JSON으로 생성하세요. 마크다운 없이 JSON만 응답합니다.\n\n시나리오: '+sc+'\n\n{"pName":"이니셜","pAge":숫자,"pGender":"여성 또는 남성","pRoom":"병실","pDoc":"의사이니셜","pDx":"진단명","pAdmDays":숫자1-7,"sChief":"현재상황 2-3문장","vSBP":숫자,"vDBP":숫자,"vHR":숫자,"vRR":숫자,"vBT":소수점1자리,"vSp":숫자,"vGCS":"의식상태","bHist":"과거력","bMeds":"약물","bAl":"알레르기","bProc":"처치","aFind":"소견 2-3문장","aLab":"검사결과","aImp":"간호사판단","rReq":"요청사항","rTo":"보고대상"}\n\n주의: 해당 시나리오에 맞는 이상 활력징후로 설정하세요.';
+  var prompt='한국 임상 간호 교육용 가상 환자 JSON을 생성하세요. 코드블록 없이 JSON 객체만 출력합니다.\n시나리오: '+sc+'\n다음 형식으로 출력(모든 키 필수, 값은 실제 임상데이터):\n{"pName":"홍○○","pAge":65,"pGender":"여성","pRoom":"301호 1번","pDoc":"김○○","pDx":"진단명","pAdmDays":3,"sChief":"현재상황","vSBP":160,"vDBP":95,"vHR":110,"vRR":24,"vBT":38.5,"vSp":91,"vGCS":"명료","bHist":"과거력","bMeds":"약물","bAl":"NKDA","bProc":"처치","aFind":"소견","aLab":"검사결과","aImp":"판단","rReq":"요청","rTo":"당직 의사"}\n활력징후는 시나리오에 맞는 이상수치로 설정하세요.';
   fetch('https://generativelanguage.googleapis.com/v1beta/models/'+MODEL+':generateContent?key='+key,{
     method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.9,maxOutputTokens:900,thinkingConfig:{thinkingBudget:0}}})
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.7,maxOutputTokens:1500,thinkingConfig:{thinkingBudget:0}}})
   }).then(function(r){return r.json();}).then(function(data){
-    var raw=data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]?data.candidates[0].content.parts[0].text:'';
-    var d=JSON.parse(raw.replace(/```json|```/g,'').trim());
-    var f=function(id,v){var el=document.getElementById(id);if(el)el.value=v||'';};
-    f('pName',d.pName);f('pAge',d.pAge);document.getElementById('pGen').value=d.pGender||'';
+    if(data.error)throw new Error(data.error.message||'API 오류');
+    var raw=data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts[0]?data.candidates[0].content.parts[0].text:'';
+    var clean=raw.replace(/```json|```/g,'').trim();
+    var d;
+    try{d=JSON.parse(clean);}
+    catch(pe){
+      console.error('JSON 파싱 오류:',pe,'raw:',raw.slice(0,200));
+      showToast('⚠️ AI 응답 오류 — 다시 시도해주세요','warn');
+      return;
+    }
+    var f=function(id,v){var el=document.getElementById(id);if(el)el.value=(v===null||v===undefined)?'':String(v);};
+    f('pName',d.pName);f('pAge',d.pAge);
+    var genEl=document.getElementById('pGen');
+    if(genEl)genEl.value=String(d.pGender||'').indexOf('남')>=0?'남성':String(d.pGender||'').indexOf('여')>=0?'여성':'';
     f('pRoom',d.pRoom);f('pDoc',d.pDoc);f('pDx',d.pDx);
-    var admDate=new Date(Date.now()-((d.pAdmDays||1)-1)*86400000).toISOString().slice(0,10);
-    f('pAdm',admDate);f('sChief',d.sChief);f('vSBP',d.vSBP);f('vDBP',d.vDBP);
-    f('vHR',d.vHR);f('vRR',d.vRR);f('vBT',d.vBT);f('vSp',d.vSp);f('vGCS',d.vGCS);
+    var days=parseInt(d.pAdmDays)||1;
+    f('pAdm',new Date(Date.now()-(days-1)*86400000).toISOString().slice(0,10));
+    f('sChief',d.sChief);f('vSBP',d.vSBP);f('vDBP',d.vDBP);f('vHR',d.vHR);
+    f('vRR',d.vRR);f('vBT',d.vBT);f('vSp',d.vSp);f('vGCS',d.vGCS);
     f('bHist',d.bHist);f('bMeds',d.bMeds);f('bAl',d.bAl);f('bProc',d.bProc);
     f('aFind',d.aFind);f('aLab',d.aLab);f('aImp',d.aImp);f('rReq',d.rReq);f('rTo',d.rTo);
     evalVitals();showToast('🎲 AI 케이스: '+sc);
