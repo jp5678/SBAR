@@ -255,6 +255,16 @@ textarea{resize:vertical;min-height:68px;line-height:1.65;}
 </div>
 
 
+
+<!-- SAVE SUCCESS POPUP -->
+<div id="savePopup" onclick="closeSavePopup()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:99999;justify-content:center;align-items:center;">
+  <div onclick="event.stopPropagation()" style="background:#fff;border-radius:22px;padding:40px 48px;text-align:center;box-shadow:0 24px 64px rgba(13,79,56,.28);max-width:340px;width:90%;transform:scale(1);">
+    <div style="font-size:56px;margin-bottom:14px;line-height:1;">✅</div>
+    <div style="font-size:21px;font-weight:800;color:#0D4F38;margin-bottom:8px;font-family:'Noto Sans KR',sans-serif;">저장되었습니다!</div>
+    <div style="font-size:13px;color:#4B7A5A;margin-bottom:26px;font-family:'Noto Sans KR',sans-serif;">보고서가 Firebase에<br>성공적으로 저장되었습니다.</div>
+    <button onclick="closeSavePopup()" style="padding:12px 40px;background:linear-gradient(135deg,#0D4F38,#15803d);color:#fff;border:none;border-radius:11px;font-family:'Noto Sans KR',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">확인</button>
+  </div>
+</div>
 <!-- ADMIN PIN MODAL -->
 <div class="modal-ov" id="adminModal">
   <div class="modal" style="max-width:320px">
@@ -455,10 +465,12 @@ function initFb(){
     var q=m.query(m.collection(fbDb,'sbar_records'),m.orderBy('ts','desc'),m.limit(200));
     _fbUnsubscribe=m.onSnapshot(q,function(snap){
       var recs=snap.docs.map(function(d){return Object.assign({},d.data(),{_id:d.id});});
+      /* saveRecord 저장 감지 콜백 */
+      if(typeof window._onSnapshotCallback==='function')window._onSnapshotCallback(recs);
       _histCache=recs;
       var n=recs.length;
       var el=document.getElementById('histBadge');
-      el.style.display=n>0?'inline':'none';el.textContent=n;
+      if(el){el.style.display=n>0?'inline':'none';el.textContent=n;}
       if(document.getElementById('tab-history').style.display!=='none')renderHist(recs);
     },function(err){
       console.error('Snapshot error:',err);
@@ -468,9 +480,10 @@ function initFb(){
   }catch(e){console.error('FB:',e);showToast('⚠️ Firebase 오류: '+e.message,'warn');}
 }
 function fbSave(r){
-  if(!fbDb)return Promise.resolve(false);
+  if(!fbDb)return Promise.resolve({ok:false,msg:'Firebase 미연결'});
   return window._fb.addDoc(window._fb.collection(fbDb,'sbar_records'),r)
-    .then(function(){return true;}).catch(function(){return false;});
+    .then(function(){return {ok:true};})
+    .catch(function(e){return {ok:false,msg:e.message||'저장 오류'};});
 }
 function fbLoad(){
   if(!fbDb)return Promise.resolve(null);
@@ -674,6 +687,36 @@ function applyAdminUI(){
   if(_histCache.length>0)renderHist(_histCache);
 }
 
+/* ── 랜덤 환자 기본정보 생성 ── */
+var KR_SURNAMES=['김','이','박','최','정','강','조','윤','장','임','한','오','서','신','권','황','안','송','류','전','홍','고','문','양','손','배','백','허','유','남','심','노','하','곽','성','차','주','우','구','나','민','진','지','엄','채','원','천','방','공'];
+var WARDS=['내과병동','외과병동','심장내과','호흡기내과','신경과','정형외과','응급의학과'];
+var DOCS=['김','이','박','최','정','강','조','윤','장','임','한','오','서','신','권'];
+
+function randomName(){
+  return KR_SURNAMES[Math.floor(Math.random()*KR_SURNAMES.length)]+'○○';
+}
+function randomDocName(){
+  return DOCS[Math.floor(Math.random()*DOCS.length)]+'○○';
+}
+function randomGender(){
+  return Math.random()<0.55?'여성':'남성';
+}
+function randomAge(){
+  /* 30~85세 사이, 고령 쪽 가중치 */
+  var ages=[32,38,44,48,52,55,58,61,63,65,67,69,71,73,75,77,79,81,83,85];
+  return ages[Math.floor(Math.random()*ages.length)];
+}
+function randomRoom(){
+  var floors=[2,3,4,5];
+  var fl=floors[Math.floor(Math.random()*floors.length)];
+  var room=Math.floor(Math.random()*15)+1;
+  var bed=Math.floor(Math.random()*4)+1;
+  return fl+'0'+String(room).padStart(1,'0')+'호 '+bed+'번 병상';
+}
+function randomAdmDays(){
+  var d=[1,2,2,3,3,4,5,6,7];
+  return d[Math.floor(Math.random()*d.length)];
+}
 var SCENARIOS=['급성 심근경색','패혈증','뇌졸중 허혈성','급성 신부전','당뇨병성 케톤산증','급성 폐부종','위장관 출혈','고혈압 응급','급성 호흡부전','심부전 악화','뇌수막염','폐색전증','저혈당 쇼크','아나필락시스 반응','욕창 3도 감염','낙상 후 골절 의심','수술 후 무기폐','요로감염 패혈증','심방세동 빈맥','수혈 부작용'];
 function aiAutoFill(){
   var key=getKey();
@@ -697,12 +740,18 @@ function aiAutoFill(){
       return;
     }
     var f=function(id,v){var el=document.getElementById(id);if(el)el.value=(v===null||v===undefined)?'':String(v);};
-    f('pName',d.pName);f('pAge',d.pAge);
+    /* 기본 정보 전부 랜덤 생성 */
+    var rGender=randomGender();
+    var rAge=randomAge();
+    var rDays=randomAdmDays();
+    f('pName',randomName());
+    f('pAge',rAge);
     var genEl=document.getElementById('pGen');
-    if(genEl)genEl.value=String(d.pGender||'').indexOf('남')>=0?'남성':String(d.pGender||'').indexOf('여')>=0?'여성':'';
-    f('pRoom',d.pRoom);f('pDoc',d.pDoc);f('pDx',d.pDx);
-    var days=parseInt(d.pAdmDays)||1;
-    f('pAdm',new Date(Date.now()-(days-1)*86400000).toISOString().slice(0,10));
+    if(genEl)genEl.value=rGender;
+    f('pRoom',randomRoom());
+    f('pDoc',randomDocName());
+    f('pDx',d.pDx);
+    f('pAdm',new Date(Date.now()-(rDays-1)*86400000).toISOString().slice(0,10));
     f('sChief',d.sChief);f('vSBP',d.vSBP);f('vDBP',d.vDBP);f('vHR',d.vHR);
     f('vRR',d.vRR);f('vBT',d.vBT);f('vSp',d.vSp);f('vGCS',d.vGCS);
     f('bHist',d.bHist);f('bMeds',d.bMeds);f('bAl',d.bAl);f('bProc',d.bProc);
@@ -836,12 +885,66 @@ function closeScoreModal(){document.getElementById('scoreModal').classList.remov
 
 /* SAVE / HISTORY */
 function saveRecord(){
-  if(!currentReport)return;
-  if(!fbDb){showToast('⚠️ Firebase 연결 중입니다. 잠시 후 다시 시도하세요','warn');return;}
-  fbSave(currentReport).then(function(ok){
-    if(ok){showToast('✅ 저장되었습니다.');refreshBadge();}
-    else showToast('❌ 저장 실패 — Firestore 보안 규칙 확인','err');
-  });
+  if(!currentReport){showToast('⚠️ 저장할 보고서가 없습니다','warn');return;}
+  if(!fbDb){
+    showToast('⚠️ Firebase 미연결 — ⚙️ 설정에서 Firebase API Key 확인','warn');
+    return;
+  }
+
+  /* 버튼 저장 중 상태 */
+  var saveBtn=document.querySelector('.act-bar .btn-g');
+  function resetBtn(){if(saveBtn){saveBtn.disabled=false;saveBtn.innerHTML='💾 저장';}}
+  if(saveBtn){saveBtn.disabled=true;saveBtn.textContent='💾 저장 중…';}
+
+  /* 저장 전 현재 캐시 수 기억 */
+  var prevCount=_histCache.length;
+
+  /* onSnapshot이 새 문서를 감지하면 팝업 표시 */
+  var _done=false;
+  var _origSnapshot=window._onSnapshotCallback;
+  window._onSnapshotCallback=function(recs){
+    if(!_done && recs.length>prevCount){
+      _done=true;
+      clearTimeout(_timer);
+      window._onSnapshotCallback=null;
+      resetBtn();
+      openSavePopup();
+      /* 기록 갱신 */
+      _histCache=recs;
+      var n=recs.length;
+      var el=document.getElementById('histBadge');
+      if(el){el.style.display=n>0?'inline':'none';el.textContent=n;}
+      if(document.getElementById('tab-history').style.display!=='none')renderHist(recs);
+    }
+  };
+
+  /* 8초 타임아웃 */
+  var _timer=setTimeout(function(){
+    if(_done)return;
+    _done=true;
+    window._onSnapshotCallback=null;
+    resetBtn();
+    showToast('❌ 저장 실패 — Firestore 보안 규칙을 allow read,write:if true; 로 설정하세요','err');
+  },8000);
+
+  /* 데이터 직렬화 후 저장 */
+  try{
+    var data=JSON.parse(JSON.stringify(currentReport));
+    window._fb.addDoc(window._fb.collection(fbDb,'sbar_records'),data)
+      .catch(function(e){
+        if(_done)return;
+        _done=true;
+        clearTimeout(_timer);
+        window._onSnapshotCallback=null;
+        resetBtn();
+        showToast('❌ 저장 실패: '+e.message,'err');
+      });
+  }catch(e){
+    _done=true;clearTimeout(_timer);
+    window._onSnapshotCallback=null;
+    resetBtn();
+    showToast('❌ 데이터 오류: '+e.message,'err');
+  }
 }
 function loadHistory(){
   if(!fbDb){
@@ -925,6 +1028,14 @@ function addMsg(role,text){
 }
 function setTyping(on){document.getElementById('typingRow').style.display=on?'flex':'none';if(on)document.getElementById('chatMsgs').scrollTop=9999;}
 function setLoading(on,msg,sub){document.getElementById('ldOv').classList.toggle('on',on);if(msg)document.getElementById('ldMsg').textContent=msg;if(sub)document.getElementById('ldSub').textContent=sub;}
+function openSavePopup(){
+  var el=document.getElementById('savePopup');
+  el.style.display='flex';
+  setTimeout(closeSavePopup, 3000);
+}
+function closeSavePopup(){
+  document.getElementById('savePopup').style.display='none';
+}
 var _tt;
 function showToast(msg,type){
   type=type||'info';var el=document.getElementById('toast');
